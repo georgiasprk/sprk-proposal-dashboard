@@ -443,6 +443,15 @@
   .gf-input::-webkit-inner-spin-button { -webkit-appearance: none; }
   .gf-input[type=number] { -moz-appearance: textfield; }
 
+  /* ---------- Date input ---------- */
+  .date-input {
+    border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px;
+    font: inherit; font-size: 12px; color: var(--ink-3); background: var(--surface);
+    cursor: pointer; width: 122px;
+  }
+  .date-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+  .date-input.has-date { color: var(--won); border-color: var(--won-bg); background: var(--won-bg); font-weight: 600; }
+
   /* ---------- Lost reason input ---------- */
   .lost-input {
     width: 100%; border: 1px solid transparent; border-radius: 4px;
@@ -1004,7 +1013,8 @@
         return Object.assign({}, d, {
           _planned:   d.plannedSubmission ? new Date(d.plannedSubmission) : null,
           _completed: d.dateCompleted     ? new Date(d.dateCompleted)     : null,
-          _value:     d.finalPrice != null ? d.finalPrice : d.budgetEstimate
+          _value:     d.finalPrice != null ? d.finalPrice : d.budgetEstimate,
+          _submitted: d.actualSubmission  ? new Date(d.actualSubmission)  : null
         });
       });
       // Reset filters and repopulate dropdowns
@@ -1290,7 +1300,8 @@
     { k: 'projectNumber',     l: 'No.',       sort: true,  w: 88 },
     { k: 'title',             l: 'Project',   sort: true },
     { k: 'client',            l: 'Client',    sort: true,  w: 160 },
-    { k: 'plannedSubmission', l: 'Submitted', sort: true,  w: 110 },
+    { k: 'plannedSubmission', l: 'Planned',   sort: true,  w: 110 },
+    { k: 'actualSubmission', l: 'Submitted', sort: true,  w: 130 },
     { k: '_value',            l: 'Quoted',    sort: true,  w: 100, num: true },
     { k: 'gutFeel',           l: 'Win %',     sort: true,  w: 72,  num: true },
     { k: 'workScopeTags',     l: 'Scope',     sort: false, w: 160 },
@@ -1377,6 +1388,9 @@
         + '<td><div class="ttl-cell"><div class="t">' + escape(p.title) + '</div>' + (p.siteLocation ? '<div class="s">' + escape(p.siteLocation) + '</div>' : '') + '</div></td>'
         + '<td class="muted">' + escape(p.client || '—') + '</td>'
         + '<td class="muted">' + fmtDate(p.plannedSubmission) + '</td>'
+        + '<td><input class="date-input' + (p.actualSubmission ? ' has-date' : '') + '" type="date" value="' + (p.actualSubmission ? p.actualSubmission.slice(0,10) : '') + '"'
+        + ' onchange="Dashboard.updateActualSubmission(\'' + eid + '\', this)"'
+        + ' title="' + (p.actualSubmission ? 'Submitted: ' + fmtDate(p.actualSubmission) : 'Click to mark as submitted') + '"></td>'
         + '<td class="num">' + (p._value != null ? fmtFull(p._value) : '—') + '</td>'
         + '<td class="num">' + gutCell + '</td>'
         + '<td class="muted" style="font-size:11px">' + escape(scope) + '</td>'
@@ -1427,6 +1441,18 @@
       Auth._saveLocal(id, { gutFeel: val });
     });
     var rows = applyFilters(); renderKPIs(rows);
+  };
+
+  Dashboard.updateActualSubmission = function (id, input) {
+    var val = input.value || null;
+    var item = _DATA.find(function (d) { return d.id === id; });
+    if (item) item.actualSubmission = val;
+    input.className = 'date-input' + (val ? ' has-date' : '');
+    Auth.patchItem(id, { field_7: val }).catch(function () {
+      Auth._saveLocal(id, { actualSubmission: val });
+    });
+    // Re-render chips in case submission filter is active
+    var rows = applyFilters(); renderChips(rows); renderTable(rows);
   };
 
   Dashboard.updateLostReason = function (id, input) {

@@ -1678,7 +1678,7 @@
     if (item) item.status = newStatus;
     Auth._saveLocal(id, { status: newStatus });
     _queueChange(id, { field_11: newStatus });
-    var rows = applyFilters(); renderKPIs(rows); renderDonut(rows); renderChips(rows); renderTenderPortal(rows);
+    var rows = applyFilters(); renderKPIs(rows); renderDonut(rows); renderChips(rows); renderTenderPortal(rows); renderTable(rows);
   };
 
   Dashboard.updateGutFeel = function (id, input) {

@@ -1206,12 +1206,20 @@
 
     grid.innerHTML = opps.map(function (p) {
       var until = daysUntil(p._planned);
+      var hasActual = !!p.actualSubmission;
       var cls = '';
-      if (until != null && until < 0) { cls = 'urgent'; }   // overdue
-      else if (until != null && until <= 30) { cls = 'flag'; } // due within 30d
-      var ageHtml = until != null
-        ? '<div class="age"><span class="n">' + (until < 0 ? Math.abs(until) + 'd overdue' : until + 'd') + '</span><span class="l">' + (until < 0 ? 'overdue' : 'until due') + '</span></div>'
-        : '<div class="age"><span class="l">No date</span></div>';
+      if (until != null && until < 0 && !hasActual) { cls = 'urgent'; }   // overdue (not yet submitted)
+      else if (until != null && until <= 30 && !hasActual) { cls = 'flag'; } // due within 30d
+      var ageHtml;
+      if (until == null) {
+        ageHtml = '<div class="age"><span class="l">No date</span></div>';
+      } else if (until < 0 && hasActual) {
+        ageHtml = '<div class="age"><span class="n">' + Math.abs(until) + 'd</span><span class="l">since submitted</span></div>';
+      } else if (until < 0) {
+        ageHtml = '<div class="age"><span class="n">' + Math.abs(until) + 'd</span><span class="l">overdue</span></div>';
+      } else {
+        ageHtml = '<div class="age"><span class="n">' + until + 'd</span><span class="l">until due</span></div>';
+      }
       var subTxt  = (p.siteLocation ? p.siteLocation + ' · ' : '') + (p.projectApprover ? approverName(p.projectApprover) : '');
       var gutHtml = p.gutFeel != null
         ? '<div class="card-gut"><span class="gut-n">' + p.gutFeel + '%</span><span class="gut-l">win %</span></div>'

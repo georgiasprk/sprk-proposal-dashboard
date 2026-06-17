@@ -400,6 +400,86 @@
     100% { opacity: 0; transform: scaleX(1); transform-origin: left; }
   }
 
+  /* ---------- Submission toggle ---------- */
+  .sub-toggle { display: flex; gap: 4px; margin-bottom: 10px; }
+  .sub-toggle button {
+    padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px;
+    background: var(--surface); cursor: pointer; font: inherit; font-size: 12px;
+    font-weight: 500; color: var(--ink-2); transition: all .15s;
+  }
+  .sub-toggle button:hover { border-color: var(--border-strong); color: var(--ink); }
+  .sub-toggle button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ---------- Status select ---------- */
+  .status-sel {
+    -webkit-appearance: none; appearance: none;
+    border: none; cursor: pointer; font: inherit;
+    font-size: 11px; font-weight: 600; border-radius: 6px;
+    padding: 3px 22px 3px 8px; width: 128px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23475467' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 5px center;
+    transition: opacity .15s;
+  }
+  .status-sel:hover { opacity: .85; }
+  .status-sel:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .status-sel.b-Opportunity  { background-color: var(--opp-bg);       color: var(--opp); }
+  .status-sel.b-Won          { background-color: var(--won-bg);       color: var(--won); }
+  .status-sel.b-Finished     { background-color: var(--finished-bg);  color: var(--finished); }
+  .status-sel.b-Lost         { background-color: var(--lost-bg);      color: var(--lost); }
+  .status-sel.b-Cancelled    { background-color: var(--cancelled-bg); color: var(--cancelled); }
+  .status-sel.b-Rejected     { background-color: var(--rejected-bg);  color: var(--rejected); }
+
+  /* ---------- Gut feel input ---------- */
+  .gf-input {
+    width: 50px; text-align: right; border: 1px solid transparent;
+    border-radius: 4px; padding: 2px 4px; font: inherit; font-size: 12px;
+    background: transparent; color: var(--ink);
+  }
+  .gf-input:hover, .gf-input:focus {
+    border-color: var(--border); outline: none; background: var(--surface);
+  }
+  .gf-input::-webkit-outer-spin-button,
+  .gf-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .gf-input[type=number] { -moz-appearance: textfield; }
+
+  /* ---------- Lost reason input ---------- */
+  .lost-input {
+    width: 100%; border: 1px solid transparent; border-radius: 4px;
+    padding: 2px 6px; font: inherit; font-size: 12px;
+    background: transparent; color: var(--ink);
+  }
+  .lost-input:hover, .lost-input:focus {
+    border-color: var(--border); outline: none; background: var(--surface);
+  }
+  .lost-input::placeholder { color: var(--ink-3); }
+
+  /* ---------- Tender portal toggle ---------- */
+  .tender-btn {
+    width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); cursor: pointer; font-size: 12px; font-weight: 700;
+    color: var(--ink-3); line-height: 1; transition: all .15s; display: inline-flex;
+    align-items: center; justify-content: center;
+  }
+  .tender-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tender-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  tr.tender-row { background: #FFFBF0; }
+
+  /* ---------- Tender portal cards ---------- */
+  .tender-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+  }
+  .tc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .tc-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .tc-meta  { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+  .tc-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .tc-status { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .tc-row { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); }
+  .tc-lost { color: var(--lost); font-style: italic; }
+  .gf-pill { font-size: 11px; font-weight: 700; background: var(--won-bg); color: var(--won); padding: 2px 7px; border-radius: 4px; }
+  .opp-empty { padding: 16px; color: var(--ink-3); font-size: 13px; }
+
   /* ---------- Responsive ---------- */
   @media (max-width: 1100px) {
     .charts { grid-template-columns: 1fr; }
@@ -556,6 +636,18 @@
     <div class="bars" id="bars"></div>
   </section>
 
+  <!-- ===================== TENDER PORTAL ===================== -->
+  <section class="sec">
+    <div class="sec-hd">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="pulse" style="background:var(--accent)"></div>
+        <h2>Tender Portal Bids</h2>
+      </div>
+      <div class="meta">Projects marked as tender portal submissions</div>
+    </div>
+    <div id="tender-section"><div class="opp-empty">No tender portal bids marked yet.</div></div>
+  </section>
+
   <!-- ===================== TABLE ===================== -->
   <section class="sec">
     <div class="sec-hd">
@@ -580,7 +672,7 @@
   var CLIENT_ID    = '4b64a630-1dc3-43cc-98cb-3007c3f9e27e';
   var TENANT_ID    = 'a9b493cd-3ae8-435e-ac7f-7832ae4dc1dc';
   var REDIRECT_URI = 'https://georgiasprk.github.io/sprk-proposal-dashboard/auth_redirect.html';
-  var SCOPE        = 'https://graph.microsoft.com/Sites.Read.All openid profile';
+  var SCOPE        = 'https://graph.microsoft.com/Sites.ReadWrite.All openid profile';
   var GRAPH_URL    = 'https://graph.microsoft.com/v1.0/sites/sprkau.sharepoint.com/lists/Project%20List/items?$expand=fields&$top=999';
 
   // ===================== SESSION STORAGE WRAPPER =====================
@@ -734,7 +826,10 @@
       var f = item.fields || {};
       // SharePoint returns generic numbered field names (field_0, field_2, etc.)
       // Mapping confirmed from live Graph API response
+      var stored = JSON.parse(localStorage.getItem('sprk_local') || '{}');
+      var local  = stored[item.id] || {};
       return {
+        id:                item.id,
         title:             f['Title']           || '',
         projectNumber:     f['field_0']         || '',
         siteLocation:      f['field_2']         || '',
@@ -748,9 +843,29 @@
         workScopeTags:     f['field_13']        || '',
         projectApprover:   f['ProjectApprover'] || '',
         dateCompleted:     f['field_12']        || f['field_7'] || null,
-        signOffStatus:     '',
-        collaboratorCode:  ''
+        gutFeel:           Auth._num(f['GutFeel'])           != null ? Auth._num(f['GutFeel'])           : (local.gutFeel           != null ? local.gutFeel           : null),
+        lostReason:        f['LostReason']      || local.lostReason      || '',
+        isTenderPortal:    f['IsTenderPortal']  != null ? !!f['IsTenderPortal']  : (local.isTenderPortal  != null ? local.isTenderPortal  : false)
       };
+    },
+
+    patchItem: function (id, fields) {
+      var token = SS.getItem('access_token');
+      var url   = 'https://graph.microsoft.com/v1.0/sites/sprkau.sharepoint.com/lists/Project%20List/items/' + id + '/fields';
+      return fetch(url, {
+        method: 'PATCH',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify(fields)
+      }).then(function (r) {
+        if (!r.ok) return r.json().then(function (e) { throw new Error((e.error && e.error.message) || 'HTTP ' + r.status); });
+        return r.json();
+      });
+    },
+
+    _saveLocal: function (id, patch) {
+      var stored = JSON.parse(localStorage.getItem('sprk_local') || '{}');
+      stored[id] = Object.assign(stored[id] || {}, patch);
+      localStorage.setItem('sprk_local', JSON.stringify(stored));
     },
 
     _num: function (v) {
@@ -841,7 +956,8 @@
       search: '', year: '', client: '',
       statuses: new Set(),
       sortKey: 'plannedSubmission', sortDir: 'desc',
-      page: 0
+      page: 0,
+      submissionFilter: 'all'
     },
     set: function (patch) {
       Object.assign(this.s, patch);
@@ -863,9 +979,10 @@
       render();
     },
     page: function (p) { this.s.page = p; render(); },
+    setSubmission: function (v) { this.s.submissionFilter = v; this.s.page = 0; render(); },
     reset: function () {
       this.s = { search: '', year: '', client: '', statuses: new Set(),
-                 sortKey: 'plannedSubmission', sortDir: 'desc', page: 0 };
+                 sortKey: 'plannedSubmission', sortDir: 'desc', page: 0, submissionFilter: 'all' };
       document.getElementById('f-search').value = '';
       document.getElementById('f-year').value = '';
       document.getElementById('f-client').value = '';
@@ -885,7 +1002,7 @@
       });
       // Reset filters and repopulate dropdowns
       State.s = { search: '', year: '', client: '', statuses: new Set(),
-                  sortKey: 'plannedSubmission', sortDir: 'desc', page: 0 };
+                  sortKey: 'plannedSubmission', sortDir: 'desc', page: 0, submissionFilter: 'all' };
       document.getElementById('f-search').value = '';
       initFilterOptions();
       render();
@@ -931,6 +1048,8 @@
       if (s.year && (!d.plannedSubmission || d.plannedSubmission.slice(0, 4) !== s.year)) return false;
       if (s.client && d.client !== s.client) return false;
       if (s.statuses.size && !s.statuses.has(d.status)) return false;
+      if (s.submissionFilter === 'submitted' && !d.actualSubmission) return false;
+      if (s.submissionFilter === 'pending'   &&  d.actualSubmission) return false;
       if (query) {
         var hay = (d.title + ' ' + (d.client || '') + ' ' + (d.projectNumber || '') + ' ' + (d.workScopeTags || '') + ' ' + (d.siteLocation || '')).toLowerCase();
         if (hay.indexOf(query) === -1) return false;
@@ -1160,27 +1279,38 @@
 
   // ================= TABLE =================
   var COLS = [
-    { k: 'status',            l: 'Status',    sort: false, w: 120 },
+    { k: 'status',            l: 'Status',    sort: false, w: 140 },
     { k: 'projectNumber',     l: 'No.',       sort: true,  w: 88 },
     { k: 'title',             l: 'Project',   sort: true },
-    { k: 'client',            l: 'Client',    sort: true,  w: 180 },
+    { k: 'client',            l: 'Client',    sort: true,  w: 160 },
     { k: 'plannedSubmission', l: 'Submitted', sort: true,  w: 110 },
     { k: '_value',            l: 'Quoted',    sort: true,  w: 100, num: true },
-    { k: 'finalCost',         l: 'Cost',      sort: true,  w: 100, num: true },
-    { k: 'workScopeTags',     l: 'Scope',     sort: false, w: 220 }
+    { k: 'gutFeel',           l: 'Win %',     sort: true,  w: 72,  num: true },
+    { k: 'workScopeTags',     l: 'Scope',     sort: false, w: 160 },
+    { k: 'lostReason',        l: 'Lost Reason', sort: false, w: 200 },
+    { k: 'isTenderPortal',    l: 'Tender',    sort: false, w: 68 }
   ];
 
   function renderChips(rows) {
     var counts = {};
     _DATA.forEach(function (d) { counts[d.status] = (counts[d.status] || 0) + 1; });
-    var html = '<div class="chip ' + (State.s.statuses.size === 0 ? 'on' : '') + '" onclick="State.set({statuses:new Set()})">All <span class="ct">' + _DATA.length + '</span></div>';
-    html += STATUSES.map(function (s) {
-      var on = State.s.statuses.has(s.key);
-      return '<div class="chip ' + (on ? 'on' : '') + '" onclick="State.toggleStatus(\'' + s.key + '\')">'
-        + '<span class="cd" style="background:' + s.color + '"></span>' + s.key
-        + ' <span class="ct">' + (counts[s.key] || 0) + '</span></div>';
-    }).join('');
-    document.getElementById('tbl-chips').innerHTML = html;
+    var sf   = State.s.submissionFilter;
+    var subToggle = '<div class="sub-toggle">'
+      + ['all','submitted','pending'].map(function (v) {
+          var labels = { all: 'All', submitted: 'Submitted', pending: 'Pending Submission' };
+          return '<button class="' + (sf === v ? 'on' : '') + '" onclick="State.setSubmission(\'' + v + '\')">' + labels[v] + '</button>';
+        }).join('')
+      + '</div>';
+    var statusChips = '<div class="chip-row">'
+      + '<div class="chip ' + (State.s.statuses.size === 0 ? 'on' : '') + '" onclick="State.set({statuses:new Set()})">All <span class="ct">' + _DATA.length + '</span></div>'
+      + STATUSES.map(function (s) {
+          var on = State.s.statuses.has(s.key);
+          return '<div class="chip ' + (on ? 'on' : '') + '" onclick="State.toggleStatus(\'' + s.key + '\')">'
+            + '<span class="cd" style="background:' + s.color + '"></span>' + s.key
+            + ' <span class="ct">' + (counts[s.key] || 0) + '</span></div>';
+        }).join('')
+      + '</div>';
+    document.getElementById('tbl-chips').innerHTML = subToggle + statusChips;
   }
 
   function renderTable(rows) {
@@ -1214,17 +1344,34 @@
     }).join('') + '</tr></thead>';
 
     var body = '<tbody>' + slice.map(function (p) {
-      var badge = '<span class="badge b-' + p.status + '"><span class="bd"></span>' + p.status + '</span>';
-      var scope = p.workScopeTags ? p.workScopeTags.split(',').map(function (t) { return t.trim(); }).slice(0, 3).join(', ') : '—';
-      return '<tr>'
-        + '<td>' + badge + '</td>'
+      var eid = escape(p.id);
+      var statusSel = '<select class="status-sel b-' + p.status + '" onchange="Dashboard.updateStatus(\'' + eid + '\', this)">'
+        + STATUSES.map(function (s) { return '<option value="' + s.key + '"' + (p.status === s.key ? ' selected' : '') + '>' + s.key + '</option>'; }).join('')
+        + '</select>';
+      var scope     = p.workScopeTags ? p.workScopeTags.split(',').map(function (t) { return t.trim(); }).slice(0, 2).join(', ') : '—';
+      var gfVal     = p.gutFeel != null ? p.gutFeel : '';
+      var gutCell   = '<input class="gf-input" type="number" min="0" max="100" value="' + gfVal + '" placeholder="—"'
+                    + ' onblur="Dashboard.updateGutFeel(\'' + eid + '\', this)"'
+                    + ' onkeydown="if(event.key===\'Enter\')this.blur()">';
+      var isLost    = (p.status === 'Lost' || p.status === 'Rejected');
+      var lostCell  = isLost
+        ? '<input class="lost-input" type="text" value="' + escape(p.lostReason) + '" placeholder="Add reason…"'
+          + ' onblur="Dashboard.updateLostReason(\'' + eid + '\', this)"'
+          + ' onkeydown="if(event.key===\'Enter\')this.blur()">'
+        : '<span class="muted" style="font-size:11px;color:var(--ink-3)">—</span>';
+      var tenderCell = '<button class="tender-btn' + (p.isTenderPortal ? ' on' : '') + '" onclick="Dashboard.toggleTenderPortal(\'' + eid + '\', this)" title="' + (p.isTenderPortal ? 'Tender portal bid' : 'Mark as tender portal') + '">'
+        + (p.isTenderPortal ? '✓' : '+') + '</button>';
+      return '<tr class="' + (p.isTenderPortal ? 'tender-row' : '') + '">'
+        + '<td>' + statusSel + '</td>'
         + '<td class="mono">' + escape(p.projectNumber || '—') + '</td>'
         + '<td><div class="ttl-cell"><div class="t">' + escape(p.title) + '</div>' + (p.siteLocation ? '<div class="s">' + escape(p.siteLocation) + '</div>' : '') + '</div></td>'
         + '<td class="muted">' + escape(p.client || '—') + '</td>'
         + '<td class="muted">' + fmtDate(p.plannedSubmission) + '</td>'
         + '<td class="num">' + (p._value != null ? fmtFull(p._value) : '—') + '</td>'
-        + '<td class="num muted">' + (p.finalCost != null ? fmtFull(p.finalCost) : '—') + '</td>'
+        + '<td class="num">' + gutCell + '</td>'
         + '<td class="muted" style="font-size:11px">' + escape(scope) + '</td>'
+        + '<td>' + lostCell + '</td>'
+        + '<td style="text-align:center">' + tenderCell + '</td>'
         + '</tr>';
     }).join('') + '</tbody>';
 
@@ -1244,6 +1391,90 @@
     document.getElementById('pg-btns').innerHTML = btns;
   }
 
+  // ================= DASHBOARD ACTIONS =================
+  Dashboard.updateStatus = function (id, sel) {
+    var newStatus = sel.value;
+    sel.className = 'status-sel b-' + newStatus;
+    var item = _DATA.find(function (d) { return d.id === id; });
+    if (item) item.status = newStatus;
+    Auth.patchItem(id, { field_11: newStatus }).then(function () {
+      var rows = applyFilters(); renderKPIs(rows); renderDonut(rows); renderChips(rows); renderTenderPortal(rows);
+    }).catch(function (err) {
+      console.warn('Status PATCH failed:', err.message);
+      var rows = applyFilters(); renderKPIs(rows); renderDonut(rows); renderChips(rows);
+    });
+  };
+
+  Dashboard.updateGutFeel = function (id, input) {
+    var raw = input.value.trim();
+    var val = raw === '' ? null : Math.max(0, Math.min(100, Math.round(parseFloat(raw))));
+    if (raw !== '' && isNaN(val)) { input.value = ''; return; }
+    var item = _DATA.find(function (d) { return d.id === id; });
+    if (item) item.gutFeel = val;
+    if (val !== null) input.value = val;
+    var spFields = val !== null ? { GutFeel: val } : { GutFeel: null };
+    Auth.patchItem(id, spFields).catch(function () {
+      Auth._saveLocal(id, { gutFeel: val });
+    });
+    var rows = applyFilters(); renderKPIs(rows);
+  };
+
+  Dashboard.updateLostReason = function (id, input) {
+    var val = input.value.trim();
+    var item = _DATA.find(function (d) { return d.id === id; });
+    if (item) item.lostReason = val;
+    Auth.patchItem(id, { LostReason: val }).catch(function () {
+      Auth._saveLocal(id, { lostReason: val });
+    });
+  };
+
+  Dashboard.toggleTenderPortal = function (id, btn) {
+    var item = _DATA.find(function (d) { return d.id === id; });
+    if (!item) return;
+    item.isTenderPortal = !item.isTenderPortal;
+    btn.className  = 'tender-btn' + (item.isTenderPortal ? ' on' : '');
+    btn.textContent = item.isTenderPortal ? '✓' : '+';
+    btn.closest('tr').className = item.isTenderPortal ? 'tender-row' : '';
+    Auth.patchItem(id, { IsTenderPortal: item.isTenderPortal }).catch(function () {
+      Auth._saveLocal(id, { isTenderPortal: item.isTenderPortal });
+    });
+    var rows = applyFilters(); renderTenderPortal(rows);
+  };
+
+  // ================= TENDER PORTAL SECTION =================
+  function renderTenderPortal(rows) {
+    var bids = _DATA.filter(function (d) { return d.isTenderPortal; });
+    var el   = document.getElementById('tender-section');
+    if (!el) return;
+    if (!bids.length) {
+      el.innerHTML = '<div class="opp-empty">No tender portal bids marked yet. Use the <strong>+</strong> toggle in the table to mark a project.</div>';
+      return;
+    }
+    bids.sort(function (a, b) { return (b._planned || 0) - (a._planned || 0); });
+    el.innerHTML = bids.map(function (p) {
+      var statusS = STATUS_BY_KEY[p.status] || { color: '#8A93A4' };
+      var gf = p.gutFeel != null ? '<span class="gf-pill">' + p.gutFeel + '%</span>' : '';
+      return '<div class="tender-card">'
+        + '<div class="tc-head">'
+        +   '<div class="tc-info">'
+        +     '<div class="tc-title">' + escape(p.title) + '</div>'
+        +     '<div class="tc-meta">' + escape(p.client || '—') + (p.siteLocation ? ' · ' + escape(p.siteLocation) : '') + '</div>'
+        +   '</div>'
+        +   '<div class="tc-right">'
+        +     '<span class="tc-status" style="background:' + statusS.color + '20;color:' + statusS.color + '">' + p.status + '</span>'
+        +     gf
+        +   '</div>'
+        + '</div>'
+        + '<div class="tc-row">'
+        +   '<span>' + escape(p.projectNumber || '—') + '</span>'
+        +   '<span>' + (p._value != null ? fmtFull(p._value) : '—') + '</span>'
+        +   '<span>' + fmtDate(p.plannedSubmission) + '</span>'
+        +   (p.lostReason ? '<span class="tc-lost">Lost: ' + escape(p.lostReason) + '</span>' : '')
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
   // ================= MAIN RENDER =================
   function render() {
     var rows = applyFilters();
@@ -1254,6 +1485,7 @@
     renderTopClients(rows);
     renderChips(rows);
     renderTable(rows);
+    renderTenderPortal(rows);
   }
 
   // ================= BOOT =================

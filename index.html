@@ -1059,7 +1059,7 @@
       TODAY = new Date();
       _DATA = (window.DATA || []).map(function (d) {
         return Object.assign({}, d, {
-          _planned:   d.plannedSubmission ? new Date(d.plannedSubmission) : null,
+          _planned:   (d.actualSubmission || d.plannedSubmission) ? new Date(d.actualSubmission || d.plannedSubmission) : null,
           _completed: d.dateCompleted     ? new Date(d.dateCompleted)     : null,
           _value:     d.finalPrice != null ? d.finalPrice : d.budgetEstimate,
           _submitted: d.actualSubmission  ? new Date(d.actualSubmission)  : null

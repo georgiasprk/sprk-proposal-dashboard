@@ -1090,6 +1090,10 @@
     var d = new Date(s);
     return d.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' });
   }
+  function daysUntil(d) {
+    if (!d) return null;
+    return Math.ceil((d - TODAY) / 86400000);
+  }
   function daysOpen(d) {
     if (!d) return null;
     return Math.floor((TODAY - d) / 86400000);
@@ -1149,13 +1153,13 @@
 
     var pipeline  = opps.reduce(function (a, d) { return a + (d._value || 0); }, 0);
     var activeVal = active.reduce(function (a, d) { return a + (d._value || 0); }, 0);
-    var oldest    = opps.reduce(function (m, d) { var x = daysOpen(d._planned); return x != null && x > m ? x : m; }, 0);
+    var oldest    = opps.reduce(function (m, d) { var x = daysUntil(d._planned); return x != null && x < m ? x : m; }, Infinity);
     var totalDecided = won.length + lost.length;
     var wr = totalDecided > 0 ? Math.round(won.length / totalDecided * 100) : 0;
 
     document.getElementById('kpi-pipeline').textContent = fmtMoney(pipeline);
     document.getElementById('kpi-pipeline-sub').innerHTML = opps.length
-      ? '<span class="em">' + opps.length + '</span> open · oldest <span class="em">' + oldest + 'd</span>'
+      ? '<span class="em">' + opps.length + '</span> open · soonest due <span class="em">' + (oldest === Infinity ? '—' : oldest + 'd') + '</span>'
       : 'No open proposals';
 
     document.getElementById('kpi-active').textContent = active.length;
@@ -1171,7 +1175,11 @@
 
   // ================= OPEN PROPOSALS =================
   function renderOpenProposals(rows) {
-    var opps = rows.filter(function (d) { return d.status === 'Opportunity'; });
+    var cutoff = new Date(TODAY.getTime() + 14 * 86400000);
+    // Exclude items due within 14 days — those show in Upcoming Submissions
+    var opps = rows.filter(function (d) {
+      return d.status === 'Opportunity' && (!d._planned || d._planned > cutoff);
+    });
     opps.sort(function (a, b) { return (daysOpen(b._planned) || 0) - (daysOpen(a._planned) || 0); });
 
     var pipeline = opps.reduce(function (a, d) { return a + (d._value || 0); }, 0);
@@ -1186,12 +1194,12 @@
     }
 
     grid.innerHTML = opps.map(function (p) {
-      var days = daysOpen(p._planned);
+      var until = daysUntil(p._planned);
       var cls = '';
-      if (days != null && days > 60) { cls = 'urgent'; }
-      else if (days != null && days > 30) { cls = 'flag'; }
-      var ageHtml = days != null
-        ? '<div class="age"><span class="n">' + days + '</span><span class="l">days open</span></div>'
+      if (until != null && until < 0) { cls = 'urgent'; }   // overdue
+      else if (until != null && until <= 30) { cls = 'flag'; } // due within 30d
+      var ageHtml = until != null
+        ? '<div class="age"><span class="n">' + (until < 0 ? Math.abs(until) + 'd overdue' : until + 'd') + '</span><span class="l">' + (until < 0 ? 'overdue' : 'until due') + '</span></div>'
         : '<div class="age"><span class="l">No date</span></div>';
       var subTxt  = (p.siteLocation ? p.siteLocation + ' · ' : '') + (p.projectApprover ? approverName(p.projectApprover) : '');
       var gutHtml = p.gutFeel != null

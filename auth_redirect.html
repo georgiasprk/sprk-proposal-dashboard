@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html><body><script>
+var p = new URLSearchParams(window.location.search);
+localStorage.setItem('sprk_auth_pending', JSON.stringify({
+  code:              p.get('code'),
+  state:             p.get('state'),
+  error:             p.get('error'),
+  error_description: p.get('error_description')
+}));
+window.location.replace('https://georgiasprk.github.io/sprk-proposal-dashboard/');
+</script></body></html>

@@ -1616,20 +1616,42 @@
     if (badge) { badge.textContent = count; }
   }
 
+  // Fields that may not exist in SharePoint yet — stored in localStorage as fallback.
+  // If SP rejects them with "not recognized", they're silently dropped from the PATCH
+  // and kept in localStorage only. Status, dates, etc. still push successfully.
+  var SP_OPTIONAL_FIELDS = ['Comments', 'GutFeel', 'LostReason', 'IsTenderPortal'];
+
   Dashboard.pushToSharePoint = function () {
     var ids = Object.keys(_pushQueue);
     if (!ids.length) return;
     var btn = document.getElementById('btn-push');
     if (btn) { btn.disabled = true; btn.textContent = 'Pushing…'; }
 
-    var promises = ids.map(function (id) {
+    function pushItem(id) {
       return Auth.patchItem(id, _pushQueue[id])
         .then(function () { delete _pushQueue[id]; })
         .catch(function (err) {
+          // If SP doesn't recognise a field, strip optional fields and retry
+          if (err.message && err.message.indexOf('is not recognized') !== -1) {
+            var retry = Object.assign({}, _pushQueue[id]);
+            SP_OPTIONAL_FIELDS.forEach(function (f) { delete retry[f]; });
+            if (!Object.keys(retry).length) {
+              // Only optional fields were queued — localStorage already has them, call it done
+              delete _pushQueue[id]; return;
+            }
+            return Auth.patchItem(id, retry)
+              .then(function () { delete _pushQueue[id]; })
+              .catch(function (err2) {
+                console.warn('Push failed for item ' + id + ':', err2.message);
+                return { failed: id, err: err2.message };
+              });
+          }
           console.warn('Push failed for item ' + id + ':', err.message);
           return { failed: id, err: err.message };
         });
-    });
+    }
+
+    var promises = ids.map(pushItem);
 
     Promise.all(promises).then(function (results) {
       var failures = results.filter(function (r) { return r && r.failed; });

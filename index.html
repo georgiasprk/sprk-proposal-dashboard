@@ -1153,14 +1153,17 @@
 
     var pipeline  = opps.reduce(function (a, d) { return a + (d._value || 0); }, 0);
     var activeVal = active.reduce(function (a, d) { return a + (d._value || 0); }, 0);
-    var oldest    = opps.reduce(function (m, d) { var x = daysUntil(d._planned); return x != null && x < m ? x : m; }, Infinity);
+    var overdueCount = opps.filter(function(d) { var x = daysUntil(d._planned); return x != null && x < 0; }).length;
+    var soonest = opps.reduce(function (m, d) { var x = daysUntil(d._planned); return x != null && x >= 0 && x < m ? x : m; }, Infinity);
     var totalDecided = won.length + lost.length;
     var wr = totalDecided > 0 ? Math.round(won.length / totalDecided * 100) : 0;
 
     document.getElementById('kpi-pipeline').textContent = fmtMoney(pipeline);
-    document.getElementById('kpi-pipeline-sub').innerHTML = opps.length
-      ? '<span class="em">' + opps.length + '</span> open · soonest due <span class="em">' + (oldest === Infinity ? '—' : oldest + 'd') + '</span>'
-      : 'No open proposals';
+    var subParts = [];
+    if (opps.length) subParts.push('<span class="em">' + opps.length + '</span> open');
+    if (overdueCount) subParts.push('<span class="em" style="color:var(--lost)">' + overdueCount + ' overdue</span>');
+    else if (soonest !== Infinity) subParts.push('next due <span class="em">' + soonest + 'd</span>');
+    document.getElementById('kpi-pipeline-sub').innerHTML = subParts.length ? subParts.join(' · ') : 'No open proposals';
 
     document.getElementById('kpi-active').textContent = active.length;
     document.getElementById('kpi-active-sub').innerHTML = active.length
@@ -1176,11 +1179,19 @@
   // ================= OPEN PROPOSALS =================
   function renderOpenProposals(rows) {
     var cutoff = new Date(TODAY.getTime() + 14 * 86400000);
-    // Exclude items due within 14 days — those show in Upcoming Submissions
+    // Exclude items due within the next 14 days (those show in Upcoming Submissions).
+    // Overdue proposals (past due date) DO show here — they need attention.
     var opps = rows.filter(function (d) {
-      return d.status === 'Opportunity' && (!d._planned || d._planned > cutoff);
+      return d.status === 'Opportunity' && (!d._planned || d._planned > cutoff || d._planned < TODAY);
     });
-    opps.sort(function (a, b) { return (daysOpen(b._planned) || 0) - (daysOpen(a._planned) || 0); });
+    // Sort: overdue first (most overdue at top), then by days until due ascending
+    opps.sort(function (a, b) {
+      var da = daysUntil(a._planned), db = daysUntil(b._planned);
+      if (da == null && db == null) return 0;
+      if (da == null) return 1;
+      if (db == null) return -1;
+      return da - db; // most overdue (most negative) first
+    });
 
     var pipeline = opps.reduce(function (a, d) { return a + (d._value || 0); }, 0);
     document.getElementById('opp-meta').innerHTML = opps.length

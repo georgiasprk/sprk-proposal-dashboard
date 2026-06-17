@@ -1709,7 +1709,19 @@
   // ================= MAIN RENDER =================
   function render() {
     var rows = applyFilters();
-    renderKPIs(rows);
+    // KPIs respond to year/client/search but not status chips
+    var s = State.s;
+    var query = s.search.trim().toLowerCase();
+    var kpiRows = _DATA.filter(function (d) {
+      if (s.year && (!d.plannedSubmission || d.plannedSubmission.slice(0, 4) !== s.year)) return false;
+      if (s.client && d.client !== s.client) return false;
+      if (query) {
+        var hay = (d.title + ' ' + (d.client || '') + ' ' + (d.projectNumber || '') + ' ' + (d.workScopeTags || '') + ' ' + (d.siteLocation || '')).toLowerCase();
+        if (hay.indexOf(query) === -1) return false;
+      }
+      return true;
+    });
+    renderKPIs(kpiRows);
     renderOpenProposals(rows);
     renderUpcoming(rows);
     renderTrend(rows);

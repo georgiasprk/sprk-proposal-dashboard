@@ -218,6 +218,9 @@
   .opp-card .age .l { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; }
   .opp-card.flag .age .n { color: #B45309; }
   .opp-card.urgent .age .n { color: #B91C1C; }
+  .card-gut { text-align: right; }
+  .card-gut .gut-n { font-size: 18px; font-weight: 700; color: #16A34A; display: block; line-height: 1; }
+  .card-gut .gut-l { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; }
   .card-comment {
     width: 100%; margin-top: 10px; padding: 6px 8px;
     border: 1px solid var(--border); border-radius: 6px;
@@ -1184,22 +1187,26 @@
 
     grid.innerHTML = opps.map(function (p) {
       var days = daysOpen(p._planned);
-      var cls = '', pillCls = '';
-      if (days != null && days > 60) { cls = 'urgent'; pillCls = 'urg'; }
+      var cls = '';
+      if (days != null && days > 60) { cls = 'urgent'; }
       else if (days != null && days > 30) { cls = 'flag'; }
       var ageHtml = days != null
         ? '<div class="age"><span class="n">' + days + '</span><span class="l">days open</span></div>'
         : '<div class="age"><span class="l">No date</span></div>';
-      var pillTxt = days != null && days > 60 ? 'Urgent' : (days != null && days > 30 ? 'Stale' : 'Open');
       var subTxt  = (p.siteLocation ? p.siteLocation + ' · ' : '') + (p.projectApprover ? approverName(p.projectApprover) : '');
+      var gutHtml = p.gutFeel != null
+        ? '<div class="card-gut"><span class="gut-n">' + p.gutFeel + '%</span><span class="gut-l">win %</span></div>'
+        : '';
       return '<div class="opp-card ' + cls + '">'
         + '<div class="top">'
         +   '<div><div class="ttl">' + escape(p.title) + '</div><div class="cli">' + escape(p.client || '—') + '</div></div>'
-        +   '<span class="pill ' + pillCls + '">' + pillTxt + '</span>'
         + '</div>'
         + '<div class="row">'
         +   '<div><div class="val">' + (p._value != null ? fmtFull(p._value) : '—') + '</div><div class="num">' + escape(p.projectNumber || '—') + (subTxt ? ' · ' + escape(subTxt) : '') + '</div></div>'
-        +   ageHtml
+        +   '<div style="display:flex;gap:12px;align-items:flex-end">'
+        +     gutHtml
+        +     ageHtml
+        +   '</div>'
         + '</div>'
         + '<input class="card-comment" type="text" placeholder="Add comment…" value="' + escape(p.comments) + '"'
         + ' onblur="Dashboard.updateComments(\'' + escape(p.id) + '\', this)"'

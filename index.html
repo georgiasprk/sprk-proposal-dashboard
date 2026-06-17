@@ -901,9 +901,9 @@
         workScopeTags:     f['field_13']        || '',
         projectApprover:   f['ProjectApprover'] || '',
         dateCompleted:     f['field_12']        || f['field_7'] || null,
-        gutFeel:           Auth._num(f['GutFeel'])           != null ? Auth._num(f['GutFeel'])           : (local.gutFeel           != null ? local.gutFeel           : null),
+        gutFeel:           Auth._num(f['Gut Feel'])           != null ? Auth._num(f['Gut Feel'])           : (local.gutFeel           != null ? local.gutFeel           : null),
         lostReason:        f['LostReason']      || local.lostReason      || '',
-        comments:          f['Comments']        || local.comments         || '',
+        comments:          f['DashboardComments'] || local.comments       || '',
         isTenderPortal:    f['IsTenderPortal']  != null ? !!f['IsTenderPortal']  : (local.isTenderPortal  != null ? local.isTenderPortal  : false)
       };
     },
@@ -1619,7 +1619,7 @@
   // Fields that may not exist in SharePoint yet — stored in localStorage as fallback.
   // If SP rejects them with "not recognized", they're silently dropped from the PATCH
   // and kept in localStorage only. Status, dates, etc. still push successfully.
-  var SP_OPTIONAL_FIELDS = ['Comments', 'GutFeel', 'LostReason', 'IsTenderPortal'];
+  var SP_OPTIONAL_FIELDS = []; // All custom columns now exist in SharePoint
 
   Dashboard.pushToSharePoint = function () {
     var ids = Object.keys(_pushQueue);
@@ -1689,7 +1689,7 @@
     if (item) item.gutFeel = val;
     if (val !== null) input.value = val;
     Auth._saveLocal(id, { gutFeel: val });
-    _queueChange(id, { GutFeel: val });
+    _queueChange(id, { 'Gut Feel': val });
     var rows = applyFilters(); renderKPIs(rows);
   };
 
@@ -1698,7 +1698,7 @@
     var item = _DATA.find(function (d) { return d.id === id; });
     if (item) item.comments = val;
     Auth._saveLocal(id, { comments: val });
-    _queueChange(id, { Comments: val });
+    _queueChange(id, { DashboardComments: val });
   };
 
   Dashboard.updateActualSubmission = function (id, input) {

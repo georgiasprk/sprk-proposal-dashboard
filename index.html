@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPRK Proposal Dashboard</title>
+<style>
+  :root {
+    --bg: #F6F7F9;
+    --surface: #FFFFFF;
+    --border: #E5E8EC;
+    --border-strong: #D1D5DB;
+    --ink: #0B1220;
+    --ink-2: #475467;
+    --ink-3: #8A93A4;
+    --brand: #0B1220;
+    --accent: #F59E0B;
+    --opp: #F59E0B;
+    --won: #10B981;
+    --finished: #2563EB;
+    --lost: #EF4444;
+    --cancelled: #94A3B8;
+    --rejected: #64748B;
+    --opp-bg: #FFFBEB;
+    --won-bg: #ECFDF5;
+    --finished-bg: #EFF6FF;
+    --lost-bg: #FEF2F2;
+    --cancelled-bg: #F1F5F9;
+    --rejected-bg: #F1F5F9;
+    --shadow: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.06);
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+    font-variant-numeric: tabular-nums;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+
+  /* ---------- Layout ---------- */
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 24px; }
+
+  /* ---------- Header ---------- */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 4px 20px; gap: 16px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-mark {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--brand); color: #fff;
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 13px; letter-spacing: .5px;
+  }
+  .brand h1 { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+  .brand .sub { font-size: 12px; color: var(--ink-3); margin-top: 1px; }
+
+  .hdr-right { display: flex; align-items: center; gap: 10px; }
+
+  .stamp {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--ink-2);
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 7px 12px; border-radius: 999px;
+  }
+  .stamp .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--won); box-shadow: 0 0 0 3px rgba(16,185,129,.15); }
+  .stamp .dot.offline { background: var(--ink-3); box-shadow: none; }
+
+  .btn-hdr {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 7px 14px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface);
+    font: inherit; font-size: 13px; font-weight: 500;
+    color: var(--ink-2); cursor: pointer; transition: all .15s;
+  }
+  .btn-hdr:hover { border-color: var(--border-strong); color: var(--ink); }
+  .btn-hdr.primary {
+    background: var(--brand); color: #fff; border-color: var(--brand);
+  }
+  .btn-hdr.primary:hover { opacity: .9; }
+  .btn-hdr svg { flex-shrink: 0; }
+
+  /* ---------- Filter row ---------- */
+  .filters {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .filters .group {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 4px 6px 4px 12px; border-radius: 8px;
+  }
+  .filters label {
+    font-size: 11px; font-weight: 600; color: var(--ink-3);
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .filters select {
+    border: 0; background: transparent; outline: none;
+    font: inherit; font-size: 13px; color: var(--ink);
+    padding: 4px 6px; border-radius: 6px; cursor: pointer;
+  }
+  .filters .search {
+    flex: 1; min-width: 220px;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 8px 12px 8px 36px; border-radius: 8px;
+    font: inherit; font-size: 13px; outline: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238A93A4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg>");
+    background-repeat: no-repeat; background-position: 12px center;
+  }
+  .filters .search:focus { border-color: var(--ink-2); }
+  .btn-reset {
+    border: 0; background: transparent; cursor: pointer;
+    color: var(--ink-2); font: inherit; font-size: 12px;
+    padding: 8px 12px; border-radius: 8px;
+  }
+  .btn-reset:hover { background: rgba(0,0,0,.04); color: var(--ink); }
+
+  /* ---------- KPI strip ---------- */
+  .kpis {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px 16px;
+    position: relative; overflow: hidden;
+  }
+  .kpi .head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .kpi .lbl {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .6px; color: var(--ink-3);
+  }
+  .kpi .icn {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: grid; place-items: center;
+  }
+  .kpi .val {
+    font-size: 28px; font-weight: 700; letter-spacing: -.02em;
+    line-height: 1.1;
+  }
+  .kpi .sub {
+    margin-top: 4px; font-size: 12px; color: var(--ink-2);
+  }
+  .kpi .sub .em { color: var(--ink); font-weight: 600; }
+  .kpi.k-opp .icn { background: var(--opp-bg); color: var(--opp); }
+  .kpi.k-act .icn { background: var(--won-bg); color: var(--won); }
+  .kpi.k-win .icn { background: #EEF2FF; color: #4F46E5; }
+  .kpi.k-rev .icn { background: var(--finished-bg); color: var(--finished); }
+
+  /* ---------- Section header ---------- */
+  .sec {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px 24px;
+    margin-bottom: 20px;
+  }
+  .sec-hd {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 16px; gap: 12px; flex-wrap: wrap;
+  }
+  .sec-hd h2 { font-size: 14px; font-weight: 700; letter-spacing: -.005em; }
+  .sec-hd .meta { font-size: 12px; color: var(--ink-3); }
+  .sec-hd .meta strong { color: var(--ink-2); font-weight: 600; }
+
+  /* ---------- Open proposals cards ---------- */
+  .opp-grid {
+    display: grid; gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  .opp-card {
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; background: #fff;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: border-color .15s, transform .15s, box-shadow .15s;
+    position: relative;
+  }
+  .opp-card:hover { border-color: var(--border-strong); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .opp-card.flag {
+    border-color: #FED7AA; background: linear-gradient(180deg, #FFFBEB 0%, #fff 60%);
+  }
+  .opp-card.urgent {
+    border-color: #FCA5A5; background: linear-gradient(180deg, #FEF2F2 0%, #fff 60%);
+  }
+  .opp-card .top {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+  }
+  .opp-card .ttl { font-size: 14px; font-weight: 600; line-height: 1.35; color: var(--ink); }
+  .opp-card .cli { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+  .opp-card .pill {
+    font-size: 11px; font-weight: 600; padding: 3px 8px;
+    border-radius: 999px; white-space: nowrap; flex-shrink: 0;
+    background: var(--opp-bg); color: #92400E; border: 1px solid #FDE68A;
+  }
+  .opp-card .pill.urg { background: #FEF2F2; color: #991B1B; border-color: #FECACA; }
+  .opp-card .row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 10px; border-top: 1px dashed var(--border);
+  }
+  .opp-card .val { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+  .opp-card .num { font-size: 11px; color: var(--ink-3); margin-top: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .opp-card .age { text-align: right; }
+  .opp-card .age .n { font-size: 18px; font-weight: 700; color: var(--ink); display: block; line-height: 1; }
+  .opp-card .age .l { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; }
+  .opp-card.flag .age .n { color: #B45309; }
+  .opp-card.urgent .age .n { color: #B91C1C; }
+  .opp-empty {
+    grid-column: 1 / -1;
+    text-align: center; padding: 40px; color: var(--ink-3); font-size: 13px;
+  }
+
+  /* ---------- Charts row ---------- */
+  .charts { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .charts .sec { margin-bottom: 0; }
+  .trend-svg { width: 100%; height: 220px; display: block; }
+  .trend-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 12px; color: var(--ink-2); }
+  .trend-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .trend-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+  .donut-wrap { display: flex; gap: 24px; align-items: center; }
+  .donut { position: relative; flex-shrink: 0; }
+  .donut svg { display: block; }
+  .donut .ctr { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+  .donut .ctr .n { font-size: 22px; font-weight: 700; line-height: 1; }
+  .donut .ctr .l { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+  .donut-legend { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .leg { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; }
+  .leg .name { display: flex; align-items: center; gap: 8px; color: var(--ink-2); }
+  .leg .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .leg .ct { font-weight: 600; color: var(--ink); }
+
+  /* ---------- Top clients ---------- */
+  .bars { display: flex; flex-direction: column; gap: 10px; }
+  .bar { display: grid; grid-template-columns: 160px 1fr auto; gap: 12px; align-items: center; font-size: 12px; }
+  .bar .nm { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar .tk { background: #F1F5F9; border-radius: 6px; height: 22px; position: relative; overflow: hidden; }
+  .bar .fl { height: 100%; background: linear-gradient(90deg, #2563EB, #4F46E5); border-radius: 6px; transition: width .5s ease; }
+  .bar .vl { font-weight: 600; font-size: 12px; min-width: 60px; text-align: right; }
+
+  /* ---------- Table ---------- */
+  .tbl-controls {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .chip {
+    padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 500;
+    background: #fff; border: 1px solid var(--border); cursor: pointer;
+    color: var(--ink-2); display: inline-flex; align-items: center; gap: 6px;
+    transition: all .15s;
+  }
+  .chip:hover { border-color: var(--border-strong); color: var(--ink); }
+  .chip .cd { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); }
+  .chip.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .chip.on .cd { background: #fff; }
+  .chip .ct { font-size: 11px; color: var(--ink-3); margin-left: 2px; }
+  .chip.on .ct { color: rgba(255,255,255,.65); }
+
+  .tbl-scroll { overflow-x: auto; margin: 0 -24px; padding: 0 24px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 920px; }
+  thead th {
+    text-align: left; padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-3); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .5px;
+    white-space: nowrap; user-select: none;
+    background: #FAFBFC; position: sticky; top: 0;
+  }
+  thead th.sortable { cursor: pointer; }
+  thead th.sortable:hover { color: var(--ink); }
+  thead th .sa { font-size: 9px; color: var(--ink-3); margin-left: 3px; }
+  tbody td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody tr:hover td { background: #FAFBFC; }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.muted { color: var(--ink-2); }
+  td.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--ink-2); }
+  .ttl-cell { max-width: 320px; }
+  .ttl-cell .t { font-weight: 500; color: var(--ink); }
+  .ttl-cell .s { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .badge .bd { width: 6px; height: 6px; border-radius: 50%; }
+  .b-Opportunity { background: var(--opp-bg); color: #92400E; }
+  .b-Opportunity .bd { background: var(--opp); }
+  .b-Won { background: var(--won-bg); color: #065F46; }
+  .b-Won .bd { background: var(--won); }
+  .b-Finished { background: var(--finished-bg); color: #1E40AF; }
+  .b-Finished .bd { background: var(--finished); }
+  .b-Lost { background: var(--lost-bg); color: #991B1B; }
+  .b-Lost .bd { background: var(--lost); }
+  .b-Cancelled { background: var(--cancelled-bg); color: #475569; }
+  .b-Cancelled .bd { background: var(--cancelled); }
+  .b-Rejected { background: var(--rejected-bg); color: #475569; }
+  .b-Rejected .bd { background: var(--rejected); }
+
+  .pager {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 16px; font-size: 12px; color: var(--ink-2);
+    flex-wrap: wrap; gap: 12px;
+  }
+  .pager-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+  .pager-btns button {
+    min-width: 30px; height: 30px; padding: 0 8px;
+    border: 1px solid var(--border); background: #fff;
+    border-radius: 6px; font: inherit; font-size: 12px;
+    cursor: pointer; color: var(--ink-2);
+  }
+  .pager-btns button:hover:not(:disabled) { background: #F8FAFC; color: var(--ink); }
+  .pager-btns button.on { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .pager-btns button:disabled { opacity: .4; cursor: not-allowed; }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--ink-3); font-size: 13px; }
+  .empty-icn { font-size: 28px; margin-bottom: 8px; opacity: .4; }
+
+  .footer {
+    text-align: center; font-size: 11px; color: var(--ink-3);
+    margin-top: 20px; padding: 16px 0;
+  }
+
+  /* ---------- Pulse ---------- */
+  .pulse {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(245,158,11,.5); }
+    70% { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+    100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+  }
+
+  /* ---------- Auth / Loading overlay ---------- */
+  #auth-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #auth-overlay.hidden { display: none; }
+  .auth-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 40px 48px;
+    text-align: center; max-width: 420px; width: 90%;
+    box-shadow: 0 4px 24px rgba(11,18,32,.08);
+  }
+  .auth-card .logo {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--brand); color: #fff;
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 18px; letter-spacing: .5px;
+    margin: 0 auto 20px;
+  }
+  .auth-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .auth-card p { font-size: 14px; color: var(--ink-2); margin-bottom: 28px; line-height: 1.6; }
+  .auth-card .err {
+    font-size: 13px; color: #B91C1C;
+    background: #FEF2F2; border: 1px solid #FECACA;
+    border-radius: 8px; padding: 10px 14px;
+    margin-bottom: 16px; text-align: left; display: none;
+  }
+  .auth-card .err.show { display: block; }
+  .btn-login {
+    width: 100%; padding: 12px;
+    background: var(--brand); color: #fff;
+    border: none; border-radius: 10px;
+    font: inherit; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: opacity .15s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn-login:hover { opacity: .9; }
+  .btn-login:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-login .spin {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
+    animation: spin .7s linear infinite; display: none;
+  }
+  .btn-login.loading .spin { display: block; }
+  .auth-note { font-size: 11px; color: var(--ink-3); margin-top: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Loading state ---------- */
+  #loading-bar {
+    position: fixed; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #F59E0B, #2563EB);
+    z-index: 200; display: none;
+  }
+  #loading-bar.show { display: block; animation: loadbar 1.5s ease-in-out infinite; }
+  @keyframes loadbar {
+    0% { opacity: 1; transform: scaleX(0); transform-origin: left; }
+    50% { opacity: 1; transform: scaleX(0.7); transform-origin: left; }
+    100% { opacity: 0; transform: scaleX(1); transform-origin: left; }
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1100px) {
+    .charts { grid-template-columns: 1fr; }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 16px; }
+    .kpis { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; }
+    .bar { grid-template-columns: 110px 1fr auto; }
+    .donut-wrap { flex-direction: column; align-items: flex-start; }
+    .auth-card { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading bar -->
+<div id="loading-bar"></div>
+
+<!-- Auth overlay -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="logo">SP</div>
+    <h2>Proposal Dashboard</h2>
+    <p>Sign in with your SPRK Microsoft account to load live proposal data from SharePoint.</p>
+    <div class="err" id="auth-err"></div>
+    <button class="btn-login" id="btn-login" onclick="Auth.login()">
+      <div class="spin"></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Sign in with Microsoft
+    </button>
+    <div class="auth-note">A Microsoft sign-in popup will open. Allow popups for this page if blocked.</div>
+  </div>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">SP</div>
+      <div>
+        <h1>Proposal Dashboard</h1>
+        <div class="sub">Pipeline overview &middot; Internal use</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="stamp"><span class="dot" id="stamp-dot"></span> Refreshed <span id="stamp-date">—</span></div>
+      <button class="btn-hdr" id="btn-refresh" onclick="Auth.refreshData()" title="Reload data from SharePoint">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+        Refresh
+      </button>
+      <button class="btn-hdr" onclick="Auth.signOut()" title="Sign out">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== FILTERS ===================== -->
+  <div class="filters">
+    <input id="f-search" class="search" type="text" placeholder="Search title, client, project number, scope…" oninput="State.set({search:this.value})">
+    <div class="group">
+      <label for="f-year">Year</label>
+      <select id="f-year" onchange="State.set({year:this.value})"><option value="">All</option></select>
+    </div>
+    <div class="group">
+      <label for="f-client">Client</label>
+      <select id="f-client" onchange="State.set({client:this.value})"><option value="">All</option></select>
+    </div>
+    <button class="btn-reset" onclick="State.reset()">Reset</button>
+  </div>
+
+  <!-- ===================== KPIs ===================== -->
+  <section class="kpis">
+    <div class="kpi k-opp">
+      <div class="head">
+        <span class="lbl">Open Pipeline</span>
+        <div class="icn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      </div>
+      <div class="val" id="kpi-pipeline">—</div>
+      <div class="sub" id="kpi-pipeline-sub">No proposals</div>
+    </div>
+    <div class="kpi k-act">
+      <div class="head">
+        <span class="lbl">Active Projects</span>
+        <div class="icn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 4 4 6-6"/></svg></div>
+      </div>
+      <div class="val" id="kpi-active">—</div>
+      <div class="sub" id="kpi-active-sub">No active work</div>
+    </div>
+    <div class="kpi k-win">
+      <div class="head">
+        <span class="lbl">Win Rate</span>
+        <div class="icn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 22h12"/><path d="M12 17v5"/><path d="M5 9a7 7 0 0 0 14 0"/></svg></div>
+      </div>
+      <div class="val" id="kpi-winrate">—</div>
+      <div class="sub" id="kpi-winrate-sub">Won vs Lost</div>
+    </div>
+    <div class="kpi k-rev">
+      <div class="head">
+        <span class="lbl">Revenue YTD</span>
+        <div class="icn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      </div>
+      <div class="val" id="kpi-rev">—</div>
+      <div class="sub" id="kpi-rev-sub">Finished this year</div>
+    </div>
+  </section>
+
+  <!-- ===================== OPEN PROPOSALS ===================== -->
+  <section class="sec">
+    <div class="sec-hd">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="pulse"></div>
+        <h2>Open Proposals — Awaiting Client Response</h2>
+      </div>
+      <div class="meta" id="opp-meta">—</div>
+    </div>
+    <div class="opp-grid" id="opp-grid"></div>
+  </section>
+
+  <!-- ===================== CHARTS ===================== -->
+  <div class="charts">
+    <section class="sec">
+      <div class="sec-hd">
+        <h2>Activity — Last 12 Months</h2>
+        <div class="meta">By proposal submission month</div>
+      </div>
+      <svg id="trend-svg" class="trend-svg"></svg>
+      <div class="trend-legend" id="trend-legend"></div>
+    </section>
+    <section class="sec">
+      <div class="sec-hd">
+        <h2>Status Mix</h2>
+        <div class="meta" id="donut-meta">—</div>
+      </div>
+      <div class="donut-wrap">
+        <div class="donut">
+          <svg id="donut-svg" width="160" height="160" viewBox="0 0 160 160"></svg>
+          <div class="ctr"><div><div class="n" id="donut-total">—</div><div class="l">Projects</div></div></div>
+        </div>
+        <div class="donut-legend" id="donut-legend"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================== TOP CLIENTS ===================== -->
+  <section class="sec">
+    <div class="sec-hd">
+      <h2>Top Clients by Revenue</h2>
+      <div class="meta">Finished &amp; Won projects, total quoted value</div>
+    </div>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <!-- ===================== TABLE ===================== -->
+  <section class="sec">
+    <div class="sec-hd">
+      <h2>All Projects <span class="meta" id="tbl-count"></span></h2>
+    </div>
+    <div class="tbl-controls" id="tbl-chips"></div>
+    <div class="tbl-scroll"><div id="tbl"></div></div>
+    <div class="pager">
+      <span id="pg-info"></span>
+      <div class="pager-btns" id="pg-btns"></div>
+    </div>
+  </section>
+
+  <div class="footer">SPRK Internal Dashboard &middot; Not for external distribution</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ===================== CONFIG =====================
+  var CLIENT_ID    = '4b64a630-1dc3-43cc-98cb-3007c3f9e27e';
+  var TENANT_ID    = 'a9b493cd-3ae8-435e-ac7f-7832ae4dc1dc';
+  var REDIRECT_URI = 'https://georgiasprk.github.io/sprk-proposal-dashboard/auth_redirect.html';
+  var SCOPE        = 'https://graph.microsoft.com/Sites.Read.All openid profile';
+  var GRAPH_URL    = 'https://graph.microsoft.com/v1.0/sites/sprkau.sharepoint.com/lists/Project%20List/items?$expand=fields&$top=999';
+
+  // ===================== SESSION STORAGE WRAPPER =====================
+  // Falls back to in-memory if sessionStorage is blocked (e.g. sandboxed iframes)
+  var _mem = {};
+  var SS = {
+    setItem: function (k, v) { try { sessionStorage.setItem(k, v); } catch(e) {} _mem[k] = v; },
+    getItem: function (k) { try { var v = sessionStorage.getItem(k); if (v !== null) return v; } catch(e) {} return _mem[k] || null; },
+    removeItem: function (k) { try { sessionStorage.removeItem(k); } catch(e) {} delete _mem[k]; }
+  };
+
+  // ===================== PKCE HELPERS =====================
+  function _randomB64url(len) {
+    var arr = new Uint8Array(len);
+    crypto.getRandomValues(arr);
+    return btoa(String.fromCharCode.apply(null, arr))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+
+  function _sha256B64url(plain) {
+    var enc = new TextEncoder().encode(plain);
+    return crypto.subtle.digest('SHA-256', enc).then(function (buf) {
+      return btoa(String.fromCharCode.apply(null, new Uint8Array(buf)))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    });
+  }
+
+  // ===================== AUTH MODULE =====================
+  var Auth = window.Auth = {
+
+    login: function () {
+      var btn = document.getElementById('btn-login');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      document.getElementById('auth-err').classList.remove('show');
+
+      var verifier = _randomB64url(64);
+      var state    = _randomB64url(16);
+      // Store in localStorage so they survive the page navigation
+      localStorage.setItem('sprk_pkce_v', verifier);
+      localStorage.setItem('sprk_pkce_s', state);
+
+      _sha256B64url(verifier).then(function (challenge) {
+        var params = new URLSearchParams({
+          client_id:             CLIENT_ID,
+          response_type:         'code',
+          redirect_uri:          REDIRECT_URI,
+          scope:                 SCOPE,
+          state:                 state,
+          code_challenge:        challenge,
+          code_challenge_method: 'S256',
+          response_mode:         'query'
+        });
+        var authUrl = 'https://login.microsoftonline.com/' + TENANT_ID + '/oauth2/v2.0/authorize?' + params.toString();
+        // Redirect the whole page — avoids all popup/COOP issues
+        window.location.href = authUrl;
+      });
+    },
+
+    exchangeCode: function (code, verifier) {
+      var params = new URLSearchParams({
+        client_id:     CLIENT_ID,
+        grant_type:    'authorization_code',
+        code:          code,
+        redirect_uri:  REDIRECT_URI,
+        code_verifier: verifier
+      });
+
+      fetch('https://login.microsoftonline.com/' + TENANT_ID + '/oauth2/v2.0/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.error) throw new Error(data.error_description || data.error);
+        SS.setItem('access_token', data.access_token);
+        if (data.refresh_token) SS.setItem('refresh_token', data.refresh_token);
+        Auth.loadDashboard();
+      })
+      .catch(function (err) {
+        Auth._loginError('Token exchange failed: ' + err.message);
+      });
+    },
+
+    refreshData: function () {
+      var token = SS.getItem('access_token');
+      if (!token) { Auth.showOverlay(); return; }
+      Auth.loadDashboard();
+    },
+
+    loadDashboard: function () {
+      document.getElementById('loading-bar').classList.add('show');
+      var btn = document.getElementById('btn-refresh');
+      if (btn) btn.disabled = true;
+
+      fetch(GRAPH_URL, {
+        headers: { 'Authorization': 'Bearer ' + SS.getItem('access_token') }
+      })
+      .then(function (r) {
+        if (r.status === 401) {
+          SS.removeItem('access_token');
+          throw new Error('401');
+        }
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (json) {
+        var items = (json.value || []);
+        // Handle pagination
+        var nextLink = json['@odata.nextLink'];
+        if (nextLink) {
+          return Auth._fetchAll(items, nextLink);
+        }
+        return items;
+      })
+      .then(function (allItems) {
+        window.DATA = allItems.map(Auth._mapFields).filter(function (d) { return d.title; });
+        Auth.hidePrevHandler = null;
+        Auth.hideOverlay();
+        Dashboard.init();
+        document.getElementById('loading-bar').classList.remove('show');
+        document.getElementById('stamp-date').textContent = new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' }) + ' — ' + new Date().toLocaleDateString('en-AU', { day: '2-digit', month: 'short' });
+        if (btn) btn.disabled = false;
+      })
+      .catch(function (err) {
+        document.getElementById('loading-bar').classList.remove('show');
+        if (btn) btn.disabled = false;
+        if (err.message === '401') {
+          Auth._loginError('Session expired — please sign in again.');
+          Auth.showOverlay();
+        } else {
+          alert('Error loading data: ' + err.message + '\n\nPlease check your permissions and try again.');
+        }
+      });
+    },
+
+    _fetchAll: function (items, nextLink) {
+      return fetch(nextLink, {
+        headers: { 'Authorization': 'Bearer ' + SS.getItem('access_token') }
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (json) {
+        var combined = items.concat(json.value || []);
+        if (json['@odata.nextLink']) return Auth._fetchAll(combined, json['@odata.nextLink']);
+        return combined;
+      });
+    },
+
+    _mapFields: function (item) {
+      var f = item.fields || {};
+      // SharePoint returns generic numbered field names (field_0, field_2, etc.)
+      // Mapping confirmed from live Graph API response
+      return {
+        title:             f['Title']           || '',
+        projectNumber:     f['field_0']         || '',
+        siteLocation:      f['field_2']         || '',
+        client:            f['field_3']         || '',
+        plannedSubmission: f['field_6']         || null,
+        actualSubmission:  f['field_7']         || null,
+        budgetEstimate:    Auth._num(f['field_8']),
+        finalPrice:        Auth._num(f['field_9']),
+        finalCost:         Auth._num(f['field_10']),
+        status:            f['field_11']        || '',
+        workScopeTags:     f['field_13']        || '',
+        projectApprover:   f['ProjectApprover'] || '',
+        dateCompleted:     f['field_12']        || f['field_7'] || null,
+        signOffStatus:     '',
+        collaboratorCode:  ''
+      };
+    },
+
+    _num: function (v) {
+      if (v === null || v === undefined || v === '') return null;
+      var n = parseFloat(v);
+      return isNaN(n) ? null : n;
+    },
+
+    _loginError: function (msg) {
+      var btn = document.getElementById('btn-login');
+      if (btn) { btn.classList.remove('loading'); btn.disabled = false; }
+      var err = document.getElementById('auth-err');
+      if (err) { err.textContent = msg; err.classList.add('show'); }
+    },
+
+    hideOverlay: function () {
+      document.getElementById('auth-overlay').classList.add('hidden');
+      document.getElementById('app').style.display = '';
+    },
+
+    showOverlay: function () {
+      document.getElementById('auth-overlay').classList.remove('hidden');
+      document.getElementById('app').style.display = 'none';
+    },
+
+    signOut: function () {
+      SS.removeItem('access_token');
+      SS.removeItem('refresh_token');
+      SS.removeItem('pkce_v');
+      SS.removeItem('pkce_s');
+      window.DATA = [];
+      Auth.showOverlay();
+      document.getElementById('auth-err').classList.remove('show');
+      var btn = document.getElementById('btn-login');
+      if (btn) { btn.classList.remove('loading'); btn.disabled = false; }
+    },
+
+    init: function () {
+      // Check for pending auth callback from redirect flow
+      var pending = localStorage.getItem('sprk_auth_pending');
+      if (pending) {
+        localStorage.removeItem('sprk_auth_pending');
+        try {
+          var cb             = JSON.parse(pending);
+          var storedState    = localStorage.getItem('sprk_pkce_s');
+          var storedVerifier = localStorage.getItem('sprk_pkce_v');
+          localStorage.removeItem('sprk_pkce_s');
+          localStorage.removeItem('sprk_pkce_v');
+          if (cb.error) {
+            Auth._loginError('Sign-in error: ' + (cb.error_description || cb.error));
+          } else if (cb.code && cb.state === storedState && storedVerifier) {
+            Auth.exchangeCode(cb.code, storedVerifier);
+          } else {
+            Auth._loginError('Auth failed — please try again.');
+          }
+        } catch(e) {
+          Auth._loginError('Auth failed — please try again.');
+        }
+        return;
+      }
+      // If we already have a token in this session, go straight to data load
+      if (SS.getItem('access_token')) {
+        Auth.loadDashboard();
+      }
+      // Otherwise show the login screen (already visible by default)
+    }
+  };
+
+  // ===================== DASHBOARD =====================
+  var TODAY = new Date();
+  var PAGE_SIZE = 25;
+
+  var STATUSES = [
+    { key: 'Opportunity', color: '#F59E0B' },
+    { key: 'Won',         color: '#10B981' },
+    { key: 'Finished',    color: '#2563EB' },
+    { key: 'Lost',        color: '#EF4444' },
+    { key: 'Cancelled',   color: '#94A3B8' },
+    { key: 'Rejected',    color: '#64748B' }
+  ];
+  var STATUS_BY_KEY = {};
+  STATUSES.forEach(function (s) { STATUS_BY_KEY[s.key] = s; });
+
+  var _DATA = [];
+
+  var State = window.State = {
+    s: {
+      search: '', year: '', client: '',
+      statuses: new Set(),
+      sortKey: 'plannedSubmission', sortDir: 'desc',
+      page: 0
+    },
+    set: function (patch) {
+      Object.assign(this.s, patch);
+      if (patch.search !== undefined || patch.year !== undefined || patch.client !== undefined || patch.statuses !== undefined) {
+        this.s.page = 0;
+      }
+      render();
+    },
+    toggleStatus: function (k) {
+      if (this.s.statuses.has(k)) this.s.statuses.delete(k);
+      else this.s.statuses.add(k);
+      this.s.page = 0;
+      render();
+    },
+    sort: function (k) {
+      if (this.s.sortKey === k) this.s.sortDir = this.s.sortDir === 'asc' ? 'desc' : 'asc';
+      else { this.s.sortKey = k; this.s.sortDir = 'desc'; }
+      this.s.page = 0;
+      render();
+    },
+    page: function (p) { this.s.page = p; render(); },
+    reset: function () {
+      this.s = { search: '', year: '', client: '', statuses: new Set(),
+                 sortKey: 'plannedSubmission', sortDir: 'desc', page: 0 };
+      document.getElementById('f-search').value = '';
+      document.getElementById('f-year').value = '';
+      document.getElementById('f-client').value = '';
+      render();
+    }
+  };
+
+  var Dashboard = window.Dashboard = {
+    init: function () {
+      TODAY = new Date();
+      _DATA = (window.DATA || []).map(function (d) {
+        return Object.assign({}, d, {
+          _planned:   d.plannedSubmission ? new Date(d.plannedSubmission) : null,
+          _completed: d.dateCompleted     ? new Date(d.dateCompleted)     : null,
+          _value:     d.finalPrice != null ? d.finalPrice : d.budgetEstimate
+        });
+      });
+      // Reset filters and repopulate dropdowns
+      State.s = { search: '', year: '', client: '', statuses: new Set(),
+                  sortKey: 'plannedSubmission', sortDir: 'desc', page: 0 };
+      document.getElementById('f-search').value = '';
+      initFilterOptions();
+      render();
+    }
+  };
+
+  // ================= HELPERS =================
+  function fmtMoney(n) {
+    if (n == null || isNaN(n)) return '—';
+    if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+    if (n >= 1e3) return '$' + (n / 1e3).toFixed(0) + 'K';
+    return '$' + Math.round(n);
+  }
+  function fmtFull(n) {
+    if (n == null || isNaN(n)) return '—';
+    return '$' + Math.round(n).toLocaleString();
+  }
+  function fmtDate(s) {
+    if (!s) return '—';
+    var d = new Date(s);
+    return d.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  function daysOpen(d) {
+    if (!d) return null;
+    return Math.floor((TODAY - d) / 86400000);
+  }
+  function approverName(email) {
+    if (!email) return '—';
+    return email.split('@')[0].split('.').map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
+  }
+  function escape(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+
+  // ================= FILTERING =================
+  function applyFilters() {
+    var s = State.s;
+    var query = s.search.trim().toLowerCase();
+    return _DATA.filter(function (d) {
+      if (s.year && (!d.plannedSubmission || d.plannedSubmission.slice(0, 4) !== s.year)) return false;
+      if (s.client && d.client !== s.client) return false;
+      if (s.statuses.size && !s.statuses.has(d.status)) return false;
+      if (query) {
+        var hay = (d.title + ' ' + (d.client || '') + ' ' + (d.projectNumber || '') + ' ' + (d.workScopeTags || '') + ' ' + (d.siteLocation || '')).toLowerCase();
+        if (hay.indexOf(query) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  // ================= INIT FILTERS =================
+  function initFilterOptions() {
+    var clients = Array.from(new Set(_DATA.map(function (d) { return d.client; }).filter(Boolean))).sort();
+    var years   = Array.from(new Set(_DATA.map(function (d) { return d.plannedSubmission ? d.plannedSubmission.slice(0, 4) : null; }).filter(Boolean))).sort().reverse();
+
+    var ys = document.getElementById('f-year');
+    ys.innerHTML = '<option value="">All</option>';
+    years.forEach(function (y) { var o = document.createElement('option'); o.value = y; o.textContent = y; ys.appendChild(o); });
+
+    var cs = document.getElementById('f-client');
+    cs.innerHTML = '<option value="">All</option>';
+    clients.forEach(function (c) { var o = document.createElement('option'); o.value = c; o.textContent = c; cs.appendChild(o); });
+  }
+
+  // ================= KPIS =================
+  function renderKPIs(rows) {
+    var opps     = rows.filter(function (d) { return d.status === 'Opportunity'; });
+    var active   = rows.filter(function (d) { return d.status === 'Won'; });
+    var finished = rows.filter(function (d) { return d.status === 'Finished'; });
+    var won      = rows.filter(function (d) { return d.status === 'Won' || d.status === 'Finished'; });
+    var lost     = rows.filter(function (d) { return d.status === 'Lost' || d.status === 'Rejected'; });
+
+    var pipeline  = opps.reduce(function (a, d) { return a + (d._value || 0); }, 0);
+    var activeVal = active.reduce(function (a, d) { return a + (d._value || 0); }, 0);
+    var oldest    = opps.reduce(function (m, d) { var x = daysOpen(d._planned); return x != null && x > m ? x : m; }, 0);
+    var totalDecided = won.length + lost.length;
+    var wr = totalDecided > 0 ? Math.round(won.length / totalDecided * 100) : 0;
+
+    var thisYear = TODAY.getFullYear();
+    var ytdRows  = finished.filter(function (d) { return d._completed && d._completed.getFullYear() === thisYear; });
+    var ytd      = ytdRows.reduce(function (a, d) { return a + (d._value || 0); }, 0);
+
+    document.getElementById('kpi-pipeline').textContent = fmtMoney(pipeline);
+    document.getElementById('kpi-pipeline-sub').innerHTML = opps.length
+      ? '<span class="em">' + opps.length + '</span> open · oldest <span class="em">' + oldest + 'd</span>'
+      : 'No open proposals';
+
+    document.getElementById('kpi-active').textContent = active.length;
+    document.getElementById('kpi-active-sub').innerHTML = active.length
+      ? 'Value in flight · <span class="em">' + fmtMoney(activeVal) + '</span>'
+      : 'No active projects';
+
+    document.getElementById('kpi-winrate').textContent = totalDecided ? wr + '%' : '—';
+    document.getElementById('kpi-winrate-sub').innerHTML = totalDecided
+      ? '<span class="em">' + won.length + '</span> won · <span class="em">' + lost.length + '</span> lost'
+      : 'Not enough data';
+
+    document.getElementById('kpi-rev').textContent = ytd > 0 ? fmtMoney(ytd) : '—';
+    document.getElementById('kpi-rev-sub').innerHTML = ytdRows.length
+      ? '<span class="em">' + ytdRows.length + '</span> finished in ' + thisYear
+      : 'No projects finished in ' + thisYear;
+  }
+
+  // ================= OPEN PROPOSALS =================
+  function renderOpenProposals(rows) {
+    var opps = rows.filter(function (d) { return d.status === 'Opportunity'; });
+    opps.sort(function (a, b) { return (daysOpen(b._planned) || 0) - (daysOpen(a._planned) || 0); });
+
+    var pipeline = opps.reduce(function (a, d) { return a + (d._value || 0); }, 0);
+    document.getElementById('opp-meta').innerHTML = opps.length
+      ? opps.length + ' proposal' + (opps.length === 1 ? '' : 's') + ' · pipeline <strong>' + fmtFull(pipeline) + '</strong>'
+      : 'Nothing pending';
+
+    var grid = document.getElementById('opp-grid');
+    if (!opps.length) {
+      grid.innerHTML = '<div class="opp-empty">No open proposals match the current filters.</div>';
+      return;
+    }
+
+    grid.innerHTML = opps.map(function (p) {
+      var days = daysOpen(p._planned);
+      var cls = '', pillCls = '';
+      if (days != null && days > 60) { cls = 'urgent'; pillCls = 'urg'; }
+      else if (days != null && days > 30) { cls = 'flag'; }
+      var ageHtml = days != null
+        ? '<div class="age"><span class="n">' + days + '</span><span class="l">days open</span></div>'
+        : '<div class="age"><span class="l">No date</span></div>';
+      var pillTxt = days != null && days > 60 ? 'Urgent' : (days != null && days > 30 ? 'Stale' : 'Open');
+      var subTxt  = (p.siteLocation ? p.siteLocation + ' · ' : '') + (p.projectApprover ? approverName(p.projectApprover) : '');
+      return '<div class="opp-card ' + cls + '">'
+        + '<div class="top">'
+        +   '<div><div class="ttl">' + escape(p.title) + '</div><div class="cli">' + escape(p.client || '—') + '</div></div>'
+        +   '<span class="pill ' + pillCls + '">' + pillTxt + '</span>'
+        + '</div>'
+        + '<div class="row">'
+        +   '<div><div class="val">' + (p._value != null ? fmtFull(p._value) : '—') + '</div><div class="num">' + escape(p.projectNumber || '—') + (subTxt ? ' · ' + escape(subTxt) : '') + '</div></div>'
+        +   ageHtml
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // ================= TREND CHART =================
+  function renderTrend(rows) {
+    var months = [];
+    var d = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
+    for (var i = 11; i >= 0; i--) {
+      var m = new Date(d.getFullYear(), d.getMonth() - i, 1);
+      months.push({
+        key: m.getFullYear() + '-' + String(m.getMonth() + 1).padStart(2, '0'),
+        label: m.toLocaleDateString('en-AU', { month: 'short' }),
+        won: 0, lost: 0, opp: 0, other: 0
+      });
+    }
+    var byKey = {};
+    months.forEach(function (m) { byKey[m.key] = m; });
+
+    rows.forEach(function (r) {
+      if (!r._planned) return;
+      var k = r._planned.getFullYear() + '-' + String(r._planned.getMonth() + 1).padStart(2, '0');
+      var b = byKey[k];
+      if (!b) return;
+      if (r.status === 'Won' || r.status === 'Finished') b.won++;
+      else if (r.status === 'Lost' || r.status === 'Rejected') b.lost++;
+      else if (r.status === 'Opportunity') b.opp++;
+      else b.other++;
+    });
+
+    var w = 720, h = 220, pad = { t: 16, r: 12, b: 28, l: 28 };
+    var iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+    var bw = iw / months.length;
+    var maxV = Math.max(1, Math.max.apply(null, months.map(function (m) { return m.won + m.lost + m.opp + m.other; })));
+    var grid = Math.ceil(maxV / 4);
+    var top  = grid * 4;
+
+    var svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">';
+    for (var g = 0; g <= 4; g++) {
+      var y = pad.t + (ih * g / 4);
+      var v = top - (top * g / 4);
+      svg += '<line x1="' + pad.l + '" y1="' + y + '" x2="' + (w - pad.r) + '" y2="' + y + '" stroke="#EEF1F5" stroke-width="1"/>';
+      svg += '<text x="' + (pad.l - 6) + '" y="' + (y + 3) + '" text-anchor="end" font-size="9" fill="#8A93A4">' + Math.round(v) + '</text>';
+    }
+    months.forEach(function (m, i) {
+      var x      = pad.l + i * bw + bw * 0.18;
+      var bWidth = bw * 0.64;
+      var stack  = [
+        { v: m.won,   c: '#10B981' },
+        { v: m.opp,   c: '#F59E0B' },
+        { v: m.lost,  c: '#EF4444' },
+        { v: m.other, c: '#CBD5E1' }
+      ];
+      var cy = pad.t + ih;
+      stack.forEach(function (s) {
+        if (s.v <= 0) return;
+        var sh = ih * s.v / top;
+        cy -= sh;
+        svg += '<rect x="' + x + '" y="' + cy + '" width="' + bWidth + '" height="' + sh + '" fill="' + s.c + '" rx="2"/>';
+      });
+      svg += '<text x="' + (x + bWidth / 2) + '" y="' + (h - 8) + '" text-anchor="middle" font-size="10" fill="#8A93A4">' + m.label + '</text>';
+    });
+    svg += '</svg>';
+
+    var el = document.getElementById('trend-svg');
+    el.outerHTML = '<div id="trend-svg" class="trend-svg" style="width:100%;height:220px">' + svg + '</div>';
+    document.getElementById('trend-legend').innerHTML = [
+      ['Won/Finished', '#10B981'],
+      ['Opportunity',  '#F59E0B'],
+      ['Lost/Rejected','#EF4444'],
+      ['Cancelled',    '#CBD5E1']
+    ].map(function (x) { return '<span><i style="background:' + x[1] + '"></i>' + x[0] + '</span>'; }).join('');
+  }
+
+  // ================= DONUT =================
+  function renderDonut(rows) {
+    var counts = STATUSES.map(function (s) { return { s: s, n: rows.filter(function (d) { return d.status === s.key; }).length }; });
+    var total  = counts.reduce(function (a, c) { return a + c.n; }, 0);
+    document.getElementById('donut-total').textContent = total;
+    document.getElementById('donut-meta').textContent = total + ' project' + (total === 1 ? '' : 's');
+
+    var cx = 80, cy = 80, ro = 70, ri = 48;
+    var svg = '', angle = -90;
+    if (total === 0) {
+      svg = '<circle cx="80" cy="80" r="' + ((ro + ri) / 2) + '" fill="none" stroke="#F1F5F9" stroke-width="' + (ro - ri) + '"/>';
+    } else {
+      counts.forEach(function (c) {
+        if (c.n === 0) return;
+        var sweep = (c.n / total) * 360;
+        if (sweep >= 359.99) sweep = 359.99;
+        var a1 = angle, a2 = angle + sweep;
+        var x1o = cx + ro * Math.cos(a1 * Math.PI / 180), y1o = cy + ro * Math.sin(a1 * Math.PI / 180);
+        var x2o = cx + ro * Math.cos(a2 * Math.PI / 180), y2o = cy + ro * Math.sin(a2 * Math.PI / 180);
+        var x1i = cx + ri * Math.cos(a2 * Math.PI / 180), y1i = cy + ri * Math.sin(a2 * Math.PI / 180);
+        var x2i = cx + ri * Math.cos(a1 * Math.PI / 180), y2i = cy + ri * Math.sin(a1 * Math.PI / 180);
+        var lg  = sweep > 180 ? 1 : 0;
+        svg += '<path d="M ' + x1o + ' ' + y1o + ' A ' + ro + ' ' + ro + ' 0 ' + lg + ' 1 ' + x2o + ' ' + y2o
+             + ' L ' + x1i + ' ' + y1i + ' A ' + ri + ' ' + ri + ' 0 ' + lg + ' 0 ' + x2i + ' ' + y2i + ' Z"'
+             + ' fill="' + c.s.color + '" stroke="#fff" stroke-width="2"/>';
+        angle += sweep;
+      });
+    }
+    document.getElementById('donut-svg').innerHTML = svg;
+    document.getElementById('donut-legend').innerHTML = counts.map(function (c) {
+      var pct = total ? Math.round(c.n / total * 100) : 0;
+      return '<div class="leg"><span class="name"><span class="dot" style="background:' + c.s.color + '"></span>' + c.s.key + '</span>'
+           + '<span class="ct">' + c.n + ' <span style="color:#8A93A4;font-weight:400">(' + pct + '%)</span></span></div>';
+    }).join('');
+  }
+
+  // ================= TOP CLIENTS =================
+  function renderTopClients(rows) {
+    var byClient = {};
+    rows.forEach(function (d) {
+      if (!d.client) return;
+      if (d.status !== 'Won' && d.status !== 'Finished') return;
+      byClient[d.client] = (byClient[d.client] || 0) + (d._value || 0);
+    });
+    var top = Object.keys(byClient).map(function (k) { return [k, byClient[k]]; })
+      .sort(function (a, b) { return b[1] - a[1]; }).slice(0, 8);
+    var max = top.length ? top[0][1] : 1;
+    var html = top.map(function (t) {
+      var pct = (t[1] / max * 100).toFixed(1);
+      return '<div class="bar"><div class="nm" title="' + escape(t[0]) + '">' + escape(t[0]) + '</div>'
+           + '<div class="tk"><div class="fl" style="width:' + pct + '%"></div></div>'
+           + '<div class="vl">' + fmtMoney(t[1]) + '</div></div>';
+    }).join('');
+    if (!top.length) html = '<div class="empty">No revenue data for current filter.</div>';
+    document.getElementById('bars').innerHTML = html;
+  }
+
+  // ================= TABLE =================
+  var COLS = [
+    { k: 'status',            l: 'Status',    sort: false, w: 120 },
+    { k: 'projectNumber',     l: 'No.',       sort: true,  w: 88 },
+    { k: 'title',             l: 'Project',   sort: true },
+    { k: 'client',            l: 'Client',    sort: true,  w: 180 },
+    { k: 'plannedSubmission', l: 'Submitted', sort: true,  w: 110 },
+    { k: '_value',            l: 'Quoted',    sort: true,  w: 100, num: true },
+    { k: 'finalCost',         l: 'Cost',      sort: true,  w: 100, num: true },
+    { k: 'workScopeTags',     l: 'Scope',     sort: false, w: 220 }
+  ];
+
+  function renderChips(rows) {
+    var counts = {};
+    _DATA.forEach(function (d) { counts[d.status] = (counts[d.status] || 0) + 1; });
+    var html = '<div class="chip ' + (State.s.statuses.size === 0 ? 'on' : '') + '" onclick="State.set({statuses:new Set()})">All <span class="ct">' + _DATA.length + '</span></div>';
+    html += STATUSES.map(function (s) {
+      var on = State.s.statuses.has(s.key);
+      return '<div class="chip ' + (on ? 'on' : '') + '" onclick="State.toggleStatus(\'' + s.key + '\')">'
+        + '<span class="cd" style="background:' + s.color + '"></span>' + s.key
+        + ' <span class="ct">' + (counts[s.key] || 0) + '</span></div>';
+    }).join('');
+    document.getElementById('tbl-chips').innerHTML = html;
+  }
+
+  function renderTable(rows) {
+    document.getElementById('tbl-count').textContent = '· ' + rows.length + ' result' + (rows.length === 1 ? '' : 's');
+    if (!rows.length) {
+      document.getElementById('tbl').innerHTML = '<div class="empty"><div class="empty-icn">∅</div>No projects match the current filters.</div>';
+      document.getElementById('pg-info').textContent = '';
+      document.getElementById('pg-btns').innerHTML = '';
+      return;
+    }
+
+    var sortKey = State.s.sortKey, sortDir = State.s.sortDir;
+    var sorted  = rows.slice().sort(function (a, b) {
+      var av = a[sortKey], bv = b[sortKey];
+      if (av == null) av = ''; if (bv == null) bv = '';
+      if (typeof av === 'number' && typeof bv === 'number') return sortDir === 'asc' ? av - bv : bv - av;
+      return sortDir === 'asc' ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+    });
+
+    var pages = Math.ceil(sorted.length / PAGE_SIZE);
+    if (State.s.page >= pages) State.s.page = 0;
+    var start = State.s.page * PAGE_SIZE;
+    var slice = sorted.slice(start, start + PAGE_SIZE);
+
+    var head = '<thead><tr>' + COLS.map(function (c) {
+      var arr   = sortKey === c.k ? '<span class="sa">' + (sortDir === 'asc' ? '▲' : '▼') + '</span>' : '';
+      var cls   = c.sort ? 'sortable' : '';
+      var click = c.sort ? ' onclick="State.sort(\'' + c.k + '\')"' : '';
+      var style = c.w ? ' style="width:' + c.w + 'px' + (c.num ? ';text-align:right' : '') + '"' : (c.num ? ' style="text-align:right"' : '');
+      return '<th class="' + cls + '"' + click + style + '>' + c.l + arr + '</th>';
+    }).join('') + '</tr></thead>';
+
+    var body = '<tbody>' + slice.map(function (p) {
+      var badge = '<span class="badge b-' + p.status + '"><span class="bd"></span>' + p.status + '</span>';
+      var scope = p.workScopeTags ? p.workScopeTags.split(',').map(function (t) { return t.trim(); }).slice(0, 3).join(', ') : '—';
+      return '<tr>'
+        + '<td>' + badge + '</td>'
+        + '<td class="mono">' + escape(p.projectNumber || '—') + '</td>'
+        + '<td><div class="ttl-cell"><div class="t">' + escape(p.title) + '</div>' + (p.siteLocation ? '<div class="s">' + escape(p.siteLocation) + '</div>' : '') + '</div></td>'
+        + '<td class="muted">' + escape(p.client || '—') + '</td>'
+        + '<td class="muted">' + fmtDate(p.plannedSubmission) + '</td>'
+        + '<td class="num">' + (p._value != null ? fmtFull(p._value) : '—') + '</td>'
+        + '<td class="num muted">' + (p.finalCost != null ? fmtFull(p.finalCost) : '—') + '</td>'
+        + '<td class="muted" style="font-size:11px">' + escape(scope) + '</td>'
+        + '</tr>';
+    }).join('') + '</tbody>';
+
+    document.getElementById('tbl').innerHTML = '<table>' + head + body + '</table>';
+
+    document.getElementById('pg-info').textContent = 'Showing ' + (start + 1) + '–' + Math.min(start + PAGE_SIZE, sorted.length) + ' of ' + sorted.length;
+    var btns   = '';
+    var maxBtns = 7;
+    btns += '<button onclick="State.page(' + (State.s.page - 1) + ')"' + (State.s.page === 0 ? ' disabled' : '') + '>‹</button>';
+    var startP = Math.max(0, State.s.page - 3);
+    var endP   = Math.min(pages, startP + maxBtns);
+    if (endP - startP < maxBtns) startP = Math.max(0, endP - maxBtns);
+    for (var i = startP; i < endP; i++) {
+      btns += '<button class="' + (i === State.s.page ? 'on' : '') + '" onclick="State.page(' + i + ')">' + (i + 1) + '</button>';
+    }
+    btns += '<button onclick="State.page(' + (State.s.page + 1) + ')"' + (State.s.page >= pages - 1 ? ' disabled' : '') + '>›</button>';
+    document.getElementById('pg-btns').innerHTML = btns;
+  }
+
+  // ================= MAIN RENDER =================
+  function render() {
+    var rows = applyFilters();
+    renderKPIs(rows);
+    renderOpenProposals(rows);
+    renderTrend(rows);
+    renderDonut(rows);
+    renderTopClients(rows);
+    renderChips(rows);
+    renderTable(rows);
+  }
+
+  // ================= BOOT =================
+  Auth.init();
+
+})();
+</script>
+</body>
+</html>

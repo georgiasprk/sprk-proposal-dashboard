@@ -961,6 +961,9 @@
     },
     set: function (patch) {
       Object.assign(this.s, patch);
+      if (patch.statuses !== undefined && !(this.s.statuses.size === 1 && this.s.statuses.has('Opportunity'))) {
+        this.s.submissionFilter = 'all';
+      }
       if (patch.search !== undefined || patch.year !== undefined || patch.client !== undefined || patch.statuses !== undefined) {
         this.s.page = 0;
       }
@@ -969,6 +972,10 @@
     toggleStatus: function (k) {
       if (this.s.statuses.has(k)) this.s.statuses.delete(k);
       else this.s.statuses.add(k);
+      // Reset submission filter unless we're now exclusively on Opportunity
+      if (!(this.s.statuses.size === 1 && this.s.statuses.has('Opportunity'))) {
+        this.s.submissionFilter = 'all';
+      }
       this.s.page = 0;
       render();
     },
@@ -1294,13 +1301,8 @@
   function renderChips(rows) {
     var counts = {};
     _DATA.forEach(function (d) { counts[d.status] = (counts[d.status] || 0) + 1; });
-    var sf   = State.s.submissionFilter;
-    var subToggle = '<div class="sub-toggle">'
-      + ['all','submitted','pending'].map(function (v) {
-          var labels = { all: 'All', submitted: 'Submitted', pending: 'Pending Submission' };
-          return '<button class="' + (sf === v ? 'on' : '') + '" onclick="State.setSubmission(\'' + v + '\')">' + labels[v] + '</button>';
-        }).join('')
-      + '</div>';
+    var sf = State.s.submissionFilter;
+    var oppOnly = State.s.statuses.size === 1 && State.s.statuses.has('Opportunity');
     var statusChips = '<div class="chip-row">'
       + '<div class="chip ' + (State.s.statuses.size === 0 ? 'on' : '') + '" onclick="State.set({statuses:new Set()})">All <span class="ct">' + _DATA.length + '</span></div>'
       + STATUSES.map(function (s) {
@@ -1310,7 +1312,15 @@
             + ' <span class="ct">' + (counts[s.key] || 0) + '</span></div>';
         }).join('')
       + '</div>';
-    document.getElementById('tbl-chips').innerHTML = subToggle + statusChips;
+    var subToggle = oppOnly
+      ? '<div class="sub-toggle">'
+          + ['all','submitted','pending'].map(function (v) {
+              var labels = { all: 'All Opportunities', submitted: 'Submitted', pending: 'Pending Submission' };
+              return '<button class="' + (sf === v ? 'on' : '') + '" onclick="State.setSubmission(\'' + v + '\')">' + labels[v] + '</button>';
+            }).join('')
+          + '</div>'
+      : '';
+    document.getElementById('tbl-chips').innerHTML = statusChips + subToggle;
   }
 
   function renderTable(rows) {

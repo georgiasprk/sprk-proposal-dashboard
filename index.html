@@ -1465,7 +1465,7 @@
   // ================= UPCOMING SUBMISSIONS =================
   function renderUpcoming(rows) {
     var cutoff = new Date(TODAY.getTime() + 14 * 86400000);
-    var upcoming = _DATA.filter(function (d) {
+    var upcoming = rows.filter(function (d) {
       return d._planned && d._planned >= TODAY && d._planned <= cutoff;
     }).slice().sort(function (a, b) { return a._planned - b._planned; });
 
@@ -1712,10 +1712,10 @@
     renderKPIs(rows);
     renderOpenProposals(rows);
     renderUpcoming(rows);
-    renderTrend(_DATA);
-    renderDonut(_DATA);
-    renderRollingAvg(_DATA);
-    renderTopClients(_DATA);
+    renderTrend(rows);
+    renderDonut(rows);
+    renderRollingAvg(rows);
+    renderTopClients(rows);
     renderChips(rows);
     renderTable(rows);
     renderTenderPortal(rows);

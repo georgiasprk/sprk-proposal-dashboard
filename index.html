@@ -214,8 +214,10 @@
   .opp-card .val { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
   .opp-card .num { font-size: 11px; color: var(--ink-3); margin-top: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   .opp-card .age { text-align: right; white-space: nowrap; }
-  .opp-card .age .n { font-size: 18px; font-weight: 700; color: var(--ink); display: block; line-height: 1; }
+  .opp-card .age .n { font-size: 15px; font-weight: 700; color: var(--ink); display: block; line-height: 1.2; }
   .opp-card .age .l { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; }
+  .opp-card .age.submitted .n { color: #2563EB; }
+  .opp-card .age.submitted .l { color: #93C5FD; }
   .opp-card.flag .age .n { color: #B45309; }
   .opp-card.urgent .age .n { color: #B91C1C; }
   .card-gut { text-align: right; }
@@ -1210,15 +1212,23 @@
       var cls = '';
       if (until != null && until < 0 && !hasActual) { cls = 'urgent'; }   // overdue (not yet submitted)
       else if (until != null && until <= 30 && !hasActual) { cls = 'flag'; } // due within 30d
+      var fmtCardDate = function (d) { return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }); };
       var ageHtml;
-      if (until == null) {
-        ageHtml = '<div class="age"><span class="l">No date</span></div>';
-      } else if (until < 0 && hasActual) {
-        ageHtml = '<div class="age"><span class="n">' + Math.abs(until) + 'd</span><span class="l">submitted</span></div>';
-      } else if (until < 0) {
-        ageHtml = '<div class="age"><span class="n">' + Math.abs(until) + 'd</span><span class="l">overdue</span></div>';
+      if (hasActual) {
+        // Submitted — show actual submission date in blue
+        var actDate = new Date(p.actualSubmission);
+        ageHtml = '<div class="age submitted"><span class="n">' + fmtCardDate(actDate) + '</span><span class="l">submitted</span></div>';
+      } else if (p._planned) {
+        var dateStr = fmtCardDate(p._planned);
+        if (until < 0) {
+          // Past due, not submitted — red, "due date" label
+          ageHtml = '<div class="age"><span class="n">' + dateStr + '</span><span class="l">due date</span></div>';
+        } else {
+          // Future — default colour
+          ageHtml = '<div class="age"><span class="n">' + dateStr + '</span><span class="l">due date</span></div>';
+        }
       } else {
-        ageHtml = '<div class="age"><span class="n">' + until + 'd</span><span class="l">until due</span></div>';
+        ageHtml = '<div class="age"><span class="l">No date</span></div>';
       }
       var subTxt  = (p.siteLocation ? p.siteLocation + ' · ' : '') + (p.projectApprover ? approverName(p.projectApprover) : '');
       var gutHtml = p.gutFeel != null

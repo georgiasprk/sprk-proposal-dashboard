@@ -1672,11 +1672,18 @@
   Dashboard.updateActualSubmission = function (id, input) {
     var val = input.value || null;
     var item = _DATA.find(function (d) { return d.id === id; });
-    if (item) item.actualSubmission = val;
+    if (item) {
+      item.actualSubmission = val;
+      // Keep _planned in sync: actual first, fall back to planned
+      item._planned = val ? new Date(val) : (item.plannedSubmission ? new Date(item.plannedSubmission) : null);
+    }
     input.className = 'date-input' + (val ? ' has-date' : '');
     Auth._saveLocal(id, { actualSubmission: val });
     _queueChange(id, { field_7: val });
-    var rows = applyFilters(); renderChips(rows); renderTable(rows);
+    // Do NOT re-render the table here — it destroys the date input mid-edit.
+    // Refresh only the sections that depend on this date.
+    var rows = applyFilters();
+    renderKPIs(rows); renderOpenProposals(rows); renderUpcoming(rows); renderChips(rows);
   };
 
   Dashboard.updateLostReason = function (id, input) {

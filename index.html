@@ -543,7 +543,6 @@
       <div class="brand-mark"><img src="sprk-logo.png" width="44" height="44" alt="SPRK" style="display:block;border-radius:8px;object-fit:cover;"/></div>
       <div>
         <h1>Proposal Dashboard</h1>
-        <div class="sub">Pipeline overview &middot; Internal use</div>
       </div>
     </div>
     <div class="hdr-right">
@@ -880,7 +879,7 @@
         budgetEstimate:    Auth._num(f['field_8']),
         finalPrice:        Auth._num(f['field_9']),
         finalCost:         Auth._num(f['field_10']),
-        status:            f['field_11']        || '',
+        status:            f['field_11']        || local.status || '',
         workScopeTags:     f['field_13']        || '',
         projectApprover:   f['ProjectApprover'] || '',
         dateCompleted:     f['field_12']        || f['field_7'] || null,
@@ -1124,11 +1123,13 @@
 
   // ================= KPIS =================
   function renderKPIs(rows) {
-    var opps     = rows.filter(function (d) { return d.status === 'Opportunity'; });
-    var active   = rows.filter(function (d) { return d.status === 'Won'; });
-    var finished = rows.filter(function (d) { return d.status === 'Finished'; });
-    var won      = rows.filter(function (d) { return d.status === 'Won' || d.status === 'Finished'; });
-    var lost     = rows.filter(function (d) { return d.status === 'Lost' || d.status === 'Rejected'; });
+    // KPIs always reflect full dataset, not filtered view
+    var all      = _DATA;
+    var opps     = all.filter(function (d) { return d.status === 'Opportunity'; });
+    var active   = all.filter(function (d) { return d.status === 'Won'; });
+    var finished = all.filter(function (d) { return d.status === 'Finished'; });
+    var won      = all.filter(function (d) { return d.status === 'Won' || d.status === 'Finished'; });
+    var lost     = all.filter(function (d) { return d.status === 'Lost' || d.status === 'Rejected'; });
 
     var pipeline  = opps.reduce(function (a, d) { return a + (d._value || 0); }, 0);
     var activeVal = active.reduce(function (a, d) { return a + (d._value || 0); }, 0);
@@ -1552,10 +1553,12 @@
     sel.className = 'status-sel b-' + newStatus;
     var item = _DATA.find(function (d) { return d.id === id; });
     if (item) item.status = newStatus;
+    // Always persist locally so refresh doesn't revert
+    Auth._saveLocal(id, { status: newStatus });
     Auth.patchItem(id, { field_11: newStatus }).then(function () {
       var rows = applyFilters(); renderKPIs(rows); renderDonut(rows); renderChips(rows); renderTenderPortal(rows);
     }).catch(function (err) {
-      console.warn('Status PATCH failed:', err.message);
+      console.warn('Status PATCH failed, kept in localStorage:', err.message);
       var rows = applyFilters(); renderKPIs(rows); renderDonut(rows); renderChips(rows);
     });
   };

@@ -491,6 +491,25 @@
   .gf-input::-webkit-inner-spin-button { -webkit-appearance: none; }
   .gf-input[type=number] { -moz-appearance: textfield; }
 
+  .price-cell { position: relative; text-align: right; }
+  .price-display {
+    cursor: pointer; display: inline-block;
+    border-radius: 4px; padding: 2px 4px;
+    border: 1px solid transparent;
+    font-size: 13px; font-weight: 500;
+  }
+  .price-display:hover { border-color: var(--border); background: var(--surface); }
+  .price-input {
+    display: none; width: 90px; text-align: right;
+    border: 1px solid var(--border-strong); border-radius: 4px;
+    padding: 2px 6px; font: inherit; font-size: 13px; font-weight: 500;
+    background: var(--surface); color: var(--ink); outline: none;
+  }
+  .price-input:focus { border-color: #BD4E33; box-shadow: 0 0 0 2px rgba(189,78,51,.12); }
+  .price-input::-webkit-outer-spin-button,
+  .price-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .price-input[type=number] { -moz-appearance: textfield; }
+
   /* ---------- Date input ---------- */
   .date-input {
     border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px;
@@ -1501,7 +1520,12 @@
         + '<td><input class="date-input' + (p.actualSubmission ? ' has-date' : '') + '" type="date" value="' + (p.actualSubmission ? p.actualSubmission.slice(0,10) : '') + '"'
         + ' onchange="Dashboard.updateActualSubmission(\'' + eid + '\', this)"'
         + ' title="' + (p.actualSubmission ? 'Submitted: ' + fmtDate(p.actualSubmission) : 'Click to mark as submitted') + '"></td>'
-        + '<td class="num">' + (p._value != null ? fmtFull(p._value) : '—') + '</td>'
+        + '<td class="price-cell">'
+        +   '<span class="price-display" onclick="Dashboard.editPrice(\'' + eid + '\', this)" title="Click to edit final price">' + (p._value != null ? fmtFull(p._value) : '—') + '</span>'
+        +   '<input class="price-input" type="number" step="1" value="' + (p._value != null ? Math.round(p._value) : '') + '" placeholder="0"'
+        +   ' onblur="Dashboard.savePrice(\'' + eid + '\', this)"'
+        +   ' onkeydown="if(event.key===\'Enter\')this.blur();if(event.key===\'Escape\'){Dashboard.cancelPrice(this);}">'
+        + '</td>'
         + '<td class="num">' + gutCell + '</td>'
         + '<td class="muted" style="font-size:11px">' + escape(scope) + '</td>'
         + '<td>' + lostCell + '</td>'
@@ -1750,6 +1774,51 @@
     if (item) item.lostReason = val;
     Auth._saveLocal(id, { lostReason: val });
     _queueChange(id, { LostReason: val });
+  };
+
+  Dashboard.editPrice = function (id, span) {
+    var td    = span.parentElement;
+    var input = td.querySelector('.price-input');
+    span.style.display = 'none';
+    input.style.display = 'inline-block';
+    input.focus();
+    input.select();
+  };
+
+  Dashboard.cancelPrice = function (input) {
+    var td   = input.parentElement;
+    var span = td.querySelector('.price-display');
+    input.style.display = 'none';
+    span.style.display  = 'inline-block';
+  };
+
+  Dashboard.savePrice = function (id, input) {
+    var raw  = input.value.trim();
+    var val  = raw === '' ? null : Math.round(parseFloat(raw));
+    var item = _DATA.find(function (d) { return d.id === id; });
+    var td   = input.parentElement;
+    var span = td.querySelector('.price-display');
+
+    if (raw !== '' && (isNaN(val) || val < 0)) {
+      input.style.borderColor = '#EF4444';
+      input.focus();
+      return;
+    }
+
+    if (item) {
+      item.finalPrice = val;
+      item._value     = val !== null ? val : (item.budgetEstimate != null ? item.budgetEstimate : null);
+    }
+
+    span.textContent   = item && item._value != null ? fmtFull(item._value) : '—';
+    input.style.display = 'none';
+    span.style.display  = 'inline-block';
+
+    Auth._saveLocal(id, { finalPrice: val });
+    _queueChange(id, { field_9: val });
+
+    var rows = applyFilters();
+    renderKPIs(rows); renderOpenProposals(rows); renderUpcoming(rows); renderDonut(rows); renderChips(rows); renderTenderPortal(rows);
   };
 
   Dashboard.toggleTenderPortal = function (id, btn) {

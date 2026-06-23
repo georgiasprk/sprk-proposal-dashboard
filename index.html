@@ -1735,7 +1735,7 @@
     if (item) item.gutFeel = val;
     if (val !== null) input.value = val;
     Auth._saveLocal(id, { gutFeel: val });
-    _queueChange(id, { 'Gut Feel': val });
+    _queueChange(id, { GutFeel: val });
     var rows = applyFilters(); renderKPIs(rows);
   };
 

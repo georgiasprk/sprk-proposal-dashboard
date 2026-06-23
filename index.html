@@ -947,8 +947,7 @@
         projectApprover:   f['ProjectApprover'] || '',
         dateCompleted:     f['field_12']        || f['field_7'] || null,
         gutFeel:           Auth._num(f['Gut Feel'])           != null ? Auth._num(f['Gut Feel'])           : (local.gutFeel           != null ? local.gutFeel           : null),
-        lostReason:        f['LostReason']      || local.lostReason      || '',
-        comments:          f['DashboardComments'] || local.comments       || '',
+        comments:          f['DashboardComments'] || local.comments || f['LostReason'] || local.lostReason || '',
         isTenderPortal:    f['IsTenderPortal']  != null ? !!f['IsTenderPortal']  : (local.isTenderPortal  != null ? local.isTenderPortal  : false)
       };
     },
@@ -1434,7 +1433,7 @@
     { k: '_value',            l: 'Quoted',    sort: true,  w: 100, num: true },
     { k: 'gutFeel',           l: 'Win %',     sort: true,  w: 72,  num: true },
     { k: 'workScopeTags',     l: 'Scope',     sort: false, w: 160 },
-    { k: 'lostReason',        l: 'Lost Reason', sort: false, w: 200 },
+    { k: 'comments',          l: 'Notes',       sort: false, w: 200 },
     { k: 'isTenderPortal',    l: 'Tender',    sort: false, w: 68 }
   ];
 
@@ -1503,12 +1502,9 @@
       var gutCell   = '<input class="gf-input" type="number" min="0" max="100" value="' + gfVal + '" placeholder="—"'
                     + ' onblur="Dashboard.updateGutFeel(\'' + eid + '\', this)"'
                     + ' onkeydown="if(event.key===\'Enter\')this.blur()">';
-      var isLost    = (p.status === 'Lost' || p.status === 'Rejected');
-      var lostCell  = isLost
-        ? '<input class="lost-input" type="text" value="' + escape(p.lostReason) + '" placeholder="Add reason…"'
-          + ' onblur="Dashboard.updateLostReason(\'' + eid + '\', this)"'
-          + ' onkeydown="if(event.key===\'Enter\')this.blur()">'
-        : '<span class="muted" style="font-size:11px;color:var(--ink-3)">—</span>';
+      var notesCell = '<input class="lost-input" type="text" value="' + escape(p.comments || '') + '" placeholder="Add note…"'
+        + ' onblur="Dashboard.updateComments(\'' + eid + '\', this)"'
+        + ' onkeydown="if(event.key===\'Enter\')this.blur()">';
       var tenderCell = '<button class="tender-btn' + (p.isTenderPortal ? ' on' : '') + '" onclick="Dashboard.toggleTenderPortal(\'' + eid + '\', this)" title="' + (p.isTenderPortal ? 'Tender portal bid' : 'Mark as tender portal') + '">'
         + (p.isTenderPortal ? '✓' : '+') + '</button>';
       return '<tr class="' + (p.isTenderPortal ? 'tender-row' : '') + '">'
@@ -1528,7 +1524,7 @@
         + '</td>'
         + '<td class="num">' + gutCell + '</td>'
         + '<td class="muted" style="font-size:11px">' + escape(scope) + '</td>'
-        + '<td>' + lostCell + '</td>'
+        + '<td>' + notesCell + '</td>'
         + '<td style="text-align:center">' + tenderCell + '</td>'
         + '</tr>';
     }).join('') + '</tbody>';
@@ -1768,13 +1764,6 @@
     renderKPIs(rows); renderOpenProposals(rows); renderUpcoming(rows); renderChips(rows);
   };
 
-  Dashboard.updateLostReason = function (id, input) {
-    var val = input.value.trim();
-    var item = _DATA.find(function (d) { return d.id === id; });
-    if (item) item.lostReason = val;
-    Auth._saveLocal(id, { lostReason: val });
-    _queueChange(id, { LostReason: val });
-  };
 
   Dashboard.editPrice = function (id, span) {
     var td    = span.parentElement;
